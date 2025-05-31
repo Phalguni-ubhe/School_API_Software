@@ -120,6 +120,11 @@ USE_I18N = True
 USE_TZ = True
 
 
+# Session Settings
+SESSION_COOKIE_AGE = 86400  # 24 hours (1 day) in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Keep session even if browser closes
+SESSION_SAVE_EVERY_REQUEST = True  # Update session on every request to keep it active
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 

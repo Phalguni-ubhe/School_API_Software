@@ -53,6 +53,22 @@
             background-color: #e9ecef;
             transform: translateY(-2px);
         }
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+        .fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
     </style>
 </head>
 <body>
@@ -62,6 +78,10 @@
     </nav>
     
     <div class="container">
+        <div id="sessionAlert" class="alert alert-info">
+            Your session will expire in 24 hours.
+        </div>
+        
         <div class="welcome-message">
             <h2>Welcome, {{ request.user.username }}!</h2>
         </div>
@@ -81,5 +101,18 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Hide alert after 10 seconds
+        window.onload = function() {
+            const alert = document.getElementById('sessionAlert');
+            setTimeout(function() {
+                alert.classList.add('fade-out');
+                setTimeout(function() {
+                    alert.style.display = 'none';
+                }, 500); // Remove from DOM after fade animation
+            }, 10000); // 10 seconds
+        };
+    </script>
 </body>
 </html>

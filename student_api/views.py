@@ -9,6 +9,10 @@ from .models import OTP
 from django.urls import reverse
 
 def login(request):
+    # If user is already logged in, redirect to dashboard
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -50,8 +54,13 @@ def login(request):
     return render(request, 'login.html')
 
 def verify_otp(request):
+    # If user is already logged in, redirect to dashboard
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
     user_id = request.session.get('user_id_for_otp')
     if not user_id:
+        messages.error(request, 'Please log in first.')
         return redirect('login')
     
     if request.method == 'POST':
@@ -61,14 +70,16 @@ def verify_otp(request):
             if otp_obj.is_valid() and otp_obj.otp == entered_otp:
                 user = otp_obj.user
                 auth_login(request, user)
-                # Clean up
-                del request.session['user_id_for_otp']
+                # Clean up only after successful verification
+                request.session.pop('user_id_for_otp', None)  # Safely remove the session key
                 otp_obj.delete()
                 return redirect('dashboard')
             else:
                 messages.error(request, 'Invalid or expired OTP. Please try again.')
+                # Don't delete session key here to allow retry
         except OTP.DoesNotExist:
             messages.error(request, 'OTP not found. Please request a new one.')
+            # Don't delete session key here to allow resend
     
     return render(request, 'verify_otp.html')
 
@@ -100,5 +111,8 @@ def dashboard(request):
     return render(request, 'dashboard.html')
 
 def logout(request):
+    # Clear any session data
+    request.session.flush()
     auth_logout(request)
+    messages.info(request, 'You have been logged out successfully.')
     return redirect('login')
