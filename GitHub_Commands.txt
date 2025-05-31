@@ -1,0 +1,27 @@
+1. Always create a branch and do your work
+    - To create branch
+    git branch branchName 
+    - To chk lists of branches (The branch in which you currently is shown in green color)
+    git branch
+    - To change branch 
+    git checkout branchName 
+    (Ex. If you want to shift to branch named phalguni then use command below
+    git checkout phalguni)
+
+2. Before you upload your work 
+    - pull the main branch so that there is no conflict
+    git pull origin main
+
+3. After your work is completed 
+    - to add all the files you changed
+    git add .
+    - commit your work 
+    git commit -m "Enter Your MSG here"
+    - push your work to your branch
+    git push origin branchName
+
+4. Create a pull request from GitHub
+    - open GitHub in browser 
+    - there will be a notification and a button of 'merge & create pull request'
+    - click on that button and write a proper message what you have done
+    - the click on 'create pull request'
