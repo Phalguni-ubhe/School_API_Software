@@ -1,0 +1,1 @@
+"""Text recognition module for processing uploaded files.""" 

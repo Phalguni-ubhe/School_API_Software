@@ -1,0 +1,760 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Upload Results - Academic Performance Indicator{% endblock %}
+
+{% block content %}
+<!-- Navigation Bar -->
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="/" class="nav-brand">
+            <img src="{% static 'images/aps-logo.png' %}" alt="APS Logo">
+            <span>APS Khadakwasla</span>
+        </a>
+        <div class="user-info">
+            <span style="color: white;">Welcome, <strong>{{ request.user.username }}</strong></span>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="page-header">
+        <h1>Upload Results</h1>
+        <a href="{% url 'dashboard' %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <div class="upload-container">
+        <form id="uploadForm" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="academic_year">Academic Year</label>
+                <input type="text" id="academic_year" name="academic_year" placeholder="e.g., 2023-2024" required>
+            </div>
+
+            <table class="upload-table">
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>File Upload</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Class X</td>
+                        <td class="file-input-cell">
+                            <input type="file" id="file_10" name="class_x_file" accept=".pdf" style="display: none;">
+                            <button type="button" class="action-btn" onclick="document.getElementById('file_10').click()">
+                                <i class="fas fa-upload"></i> Choose PDF
+                            </button>
+                            <span class="file-status" id="status_10">No file chosen</span>
+                        </td>
+                        <td><span class="file-status" id="upload_status_10">-</span></td>
+                        <td><i class="fas fa-times file-action" onclick="clearFile('10')"></i></td>
+                    </tr>
+                    <tr>
+                        <td>Class XII Science</td>
+                        <td class="file-input-cell">
+                            <input type="file" id="file_12_science" name="class_12_science_file" accept=".pdf" style="display: none;">
+                            <button type="button" class="action-btn" onclick="document.getElementById('file_12_science').click()">
+                                <i class="fas fa-upload"></i> Choose PDF
+                            </button>
+                            <span class="file-status" id="status_12_science">No file chosen</span>
+                        </td>
+                        <td><span class="file-status" id="upload_status_12_science">-</span></td>
+                        <td><i class="fas fa-times file-action" onclick="clearFile('12_science')"></i></td>
+                    </tr>
+                    <tr>
+                        <td>Class XII Commerce</td>
+                        <td class="file-input-cell">
+                            <input type="file" id="file_12_commerce" name="class_12_commerce_file" accept=".pdf" style="display: none;">
+                            <button type="button" class="action-btn" onclick="document.getElementById('file_12_commerce').click()">
+                                <i class="fas fa-upload"></i> Choose PDF
+                            </button>
+                            <span class="file-status" id="status_12_commerce">No file chosen</span>
+                        </td>
+                        <td><span class="file-status" id="upload_status_12_commerce">-</span></td>
+                        <td><i class="fas fa-times file-action" onclick="clearFile('12_commerce')"></i></td>
+                    </tr>
+                    <tr>
+                        <td>Class XII Humanities</td>
+                        <td class="file-input-cell">
+                            <input type="file" id="file_12_humanities" name="class_12_humanities_file" accept=".pdf" style="display: none;">
+                            <button type="button" class="action-btn" onclick="document.getElementById('file_12_humanities').click()">
+                                <i class="fas fa-upload"></i> Choose PDF
+                            </button>
+                            <span class="file-status" id="status_12_humanities">No file chosen</span>
+                        </td>
+                        <td><span class="file-status" id="upload_status_12_humanities">-</span></td>
+                        <td><i class="fas fa-times file-action" onclick="clearFile('12_humanities')"></i></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <i class="fas fa-upload"></i>
+                Upload Results
+            </button>
+        </form>
+    </div>
+
+    <!-- New Card for Existing PDFs -->
+    <div class="existing-pdfs-container">
+        <div class="section-header">
+            <h2 class="section-title">Available PDF Files</h2>
+            <button onclick="refreshPDFList()" class="refresh-btn">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+        <div class="pdf-grid" id="pdfGrid">
+            <!-- PDF cards will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Navigation Styles */
+    .navbar {
+        background: #1e3c72;
+        padding: 0.3rem 2rem;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        height: 50px;
+        display: flex;
+        align-items: center;
+    }
+
+    .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .nav-brand {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: white;
+    }
+
+    .nav-brand img {
+        height: 30px;
+        margin-right: 12px;
+    }
+
+    .nav-brand span {
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    /* Main Content Styles */
+    .main-content {
+        margin-top: 60px;
+        flex: 1;
+        padding: 1.5rem;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+    }
+
+    .page-header {
+        background: white;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-header h1 {
+        color: #1e3c72;
+        font-size: 1.8rem;
+    }
+
+    .back-btn {
+        color: #1e3c72;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+        transition: opacity 0.3s ease;
+    }
+
+    .back-btn:hover {
+        opacity: 0.8;
+    }
+
+    .upload-container {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #1e3c72;
+        font-weight: 500;
+    }
+
+    .form-group input[type="text"] {
+        width: 100%;
+        padding: 0.8rem;
+        border: 2px solid #e1e1e1;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-group input[type="text"]:focus {
+        outline: none;
+        border-color: #1e3c72;
+    }
+
+    .upload-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 2rem;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .upload-table th,
+    .upload-table td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #e1e1e1;
+    }
+
+    .upload-table th {
+        background: #1e3c72;
+        color: white;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .upload-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .file-input-cell {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .action-btn {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: #1e3c72;
+        transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+        background: #e9ecef;
+    }
+
+    .file-status {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .success-status {
+        color: #4CAF50;
+    }
+
+    .error-status {
+        color: #dc3545;
+    }
+
+    .file-action {
+        color: #dc3545;
+        cursor: pointer;
+        transition: opacity 0.3s ease;
+    }
+
+    .file-action:hover {
+        opacity: 0.7;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 4px;
+        background-color: #fff;
+        border: 1px solid #dc3545;
+        display: none;
+    }
+
+    .file-status.success-status {
+        color: #28a745;
+    }
+
+    .file-status.error-status {
+        color: #dc3545;
+    }
+
+    /* Alert Styles */
+    .messages {
+        margin-bottom: 1.5rem;
+    }
+
+    .alert {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: inherit;
+        opacity: 0.5;
+    }
+
+    .btn-close:hover {
+        opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+        .navbar {
+            padding: 0.3rem 1rem;
+            height: 45px;
+        }
+
+        .main-content {
+            margin-top: 45px;
+            padding: 1rem;
+        }
+
+        .page-header {
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+
+    /* Styles for PDF listing */
+    .existing-pdfs-container {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-top: 2rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+        color: #1e3c72;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+    }
+
+    .pdf-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .pdf-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        border: 1px solid #e1e1e1;
+    }
+
+    .pdf-card h3 {
+        color: #1e3c72;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+    }
+
+    .pdf-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .pdf-item {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 0.8rem;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e1e1e1;
+    }
+
+    .pdf-item i {
+        color: #dc3545;
+    }
+
+    .pdf-item span {
+        flex: 1;
+        font-size: 0.9rem;
+        color: #333;
+        word-break: break-all;
+    }
+
+    .process-btn {
+        background: #1e3c72;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .process-btn:hover {
+        background: #2a5298;
+    }
+
+    .no-files {
+        color: #666;
+        font-style: italic;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .refresh-btn {
+        background: #1e3c72;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .refresh-btn:hover {
+        background: #2a5298;
+    }
+
+    .refresh-btn i {
+        transition: transform 0.3s ease;
+    }
+
+    .refresh-btn.rotating i {
+        transform: rotate(360deg);
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadForm = document.getElementById('uploadForm');
+    const errorMessage = document.getElementById('errorMessage');
+    const academicYearInput = document.getElementById('academic_year');
+
+    // Load PDF files on page load
+    loadPDFFiles();
+
+    // Handle file selection
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.addEventListener('change', function() {
+            const id = this.id.replace('file_', '');
+            const statusSpan = document.getElementById(`status_${id}`);
+            const uploadStatusSpan = document.getElementById(`upload_status_${id}`);
+            
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                // Check if file is PDF
+                if (!file.name.toLowerCase().endsWith('.pdf')) {
+                    showAlert('Please select a PDF file only', 'error');
+                    this.value = ''; // Clear the file input
+                    statusSpan.textContent = 'No file chosen';
+                    uploadStatusSpan.textContent = '-';
+                    uploadStatusSpan.className = 'file-status';
+                    return;
+                }
+                
+                statusSpan.textContent = file.name;
+                uploadStatusSpan.textContent = 'Ready to upload';
+                uploadStatusSpan.className = 'file-status';
+            } else {
+                statusSpan.textContent = 'No file chosen';
+                uploadStatusSpan.textContent = '-';
+                uploadStatusSpan.className = 'file-status';
+            }
+        });
+    });
+
+    // Handle form submission
+    uploadForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const academicYear = academicYearInput.value.trim();
+
+        if (!academicYear) {
+            showAlert('Please enter the Academic Year', 'error');
+            academicYearInput.focus();
+            return;
+        }
+
+        // Validate academic year format (YYYY-YYYY)
+        const yearPattern = /^\d{4}-\d{4}$/;
+        if (!yearPattern.test(academicYear)) {
+            showAlert('Academic Year must be in format YYYY-YYYY (e.g., 2023-2024)', 'error');
+            academicYearInput.focus();
+            return;
+        }
+
+        let hasFiles = false;
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            if (input.files.length > 0) hasFiles = true;
+        });
+
+        if (!hasFiles) {
+            showAlert('Please select at least one PDF file to upload', 'error');
+            return;
+        }
+
+        // Submit the form
+        this.submit();
+    });
+});
+
+function showAlert(message, type) {
+    const messages = document.querySelector('.messages');
+    messages.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+
+    // Auto-hide alert after 7 seconds
+    setTimeout(() => {
+        const alerts = messages.getElementsByClassName('alert');
+        for(let alert of alerts) {
+            alert.style.display = 'none';
+        }
+    }, 7000);
+}
+
+function refreshPDFList() {
+    const refreshBtn = document.querySelector('.refresh-btn');
+    refreshBtn.classList.add('rotating');
+    loadPDFFiles();
+    
+    // Remove rotating class after animation
+    setTimeout(() => {
+        refreshBtn.classList.remove('rotating');
+    }, 1000);
+}
+
+function loadPDFFiles() {
+    fetch('/get-pdf-files/')
+        .then(response => response.json())
+        .then(data => {
+            const pdfGrid = document.getElementById('pdfGrid');
+            pdfGrid.innerHTML = ''; // Clear existing content
+
+            const classes = {
+                'class_10': 'Class X',
+                'class_12_science': 'Class XII Science',
+                'class_12_commerce': 'Class XII Commerce',
+                'class_12_humanities': 'Class XII Humanities'
+            };
+
+            for (const [className, displayName] of Object.entries(classes)) {
+                const files = data.files[className] || [];
+                const card = document.createElement('div');
+                card.className = 'pdf-card';
+                card.innerHTML = `
+                    <h3>${displayName}</h3>
+                    <div class="pdf-list">
+                        ${files.length ? files.map(pdf => `
+                            <div class="pdf-item">
+                                <i class="fas fa-file-pdf"></i>
+                                <span>${pdf}</span>
+                                <button class="process-btn" onclick="processPDF('${className}', '${pdf}')">
+                                    <i class="fas fa-cogs"></i> Process
+                                </button>
+                            </div>
+                        `).join('') : '<p class="no-files">No PDF files available</p>'}
+                    </div>
+                `;
+                pdfGrid.appendChild(card);
+            }
+        })
+        .catch(error => {
+            showAlert('Error loading PDF files: ' + error.message, 'error');
+        });
+}
+
+function processPDF(className, fileName) {
+    const processBtn = event.target;
+    const originalText = processBtn.innerHTML;
+    processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    processBtn.disabled = true;
+
+    // Get CSRF token
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Create form data
+    const formData = new FormData();
+    formData.append('class_name', className);
+    formData.append('file_name', fileName);
+
+    // Make AJAX call
+    fetch('/process-pdf/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Show success message
+            const messages = document.querySelector('.messages');
+            messages.innerHTML = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            
+            // You can handle the output here if needed
+            console.log('Processing output:', data.output);
+        } else {
+            // Show error message
+            const messages = document.querySelector('.messages');
+            messages.innerHTML = `
+                <div class="alert alert-error alert-dismissible fade show" role="alert">
+                    ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        // Show error message
+        const messages = document.querySelector('.messages');
+        messages.innerHTML = `
+            <div class="alert alert-error alert-dismissible fade show" role="alert">
+                Error processing PDF: ${error.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+    })
+    .finally(() => {
+        // Reset button
+        processBtn.innerHTML = originalText;
+        processBtn.disabled = false;
+    });
+}
+</script>
+{% endblock %} 

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <h2 class="mb-4">Upload Results - Academic Year {{ academic_year }}</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title mb-4">Files Uploaded Successfully</h5>
+            
+            {% for field_name, result in results.items %}
+                <div class="mb-3">
+                    <h6>{{ field_name|cut:"_file"|title }}</h6>
+                    {% if result.status == 'Success' %}
+                        <div class="alert alert-success">
+                            <p><strong>Status:</strong> {{ result.status }}</p>
+                            <p><strong>File:</strong> {{ result.filename }}</p>
+                            <p><strong>Saved to:</strong> {{ result.path }}</p>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-danger">
+                            <p><strong>Status:</strong> {{ result.status }}</p>
+                            <p><strong>Error:</strong> {{ result.error }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <div class="mt-4">
+                <a href="{% url 'upload_results' %}" class="btn btn-primary">Upload More Files</a>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function() {
+        var alerts = document.getElementsByClassName('alert');
+        for(var i = 0; i < alerts.length; i++) {
+            if (alerts[i].classList.contains('alert-success')) {
+                alerts[i].style.display = 'none';
+            }
+        }
+    }, 5000);
+</script>
+{% endblock %} 

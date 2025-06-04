@@ -25,4 +25,10 @@ urlpatterns = [
     path('resend-otp/', views.resend_otp, name='resend_otp'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('logout/', views.logout, name='logout'),
+    path('download-report/', views.download_report, name='download_report'),
+    path('upload-results/', views.upload_results, name='upload_results'),
+    path('view-charts/', views.view_charts, name='view_charts'),
+    path('results-view/', views.results_view, name='results_view'),
+    path('process-pdf/', views.process_pdf, name='process_pdf'),
+    path('get-pdf-files/', views.get_pdf_files_list, name='get_pdf_files'),
 ]
