@@ -20,6 +20,22 @@ import sys
 # Set up logging
 logger = logging.getLogger(__name__)
 
+def get_academic_years():
+    """Generate a list of academic years including past years"""
+    current_year = datetime.now().year
+    # Generate years from 10 years before current to 3 years after
+    years = []
+    for year in range(current_year - 10, current_year + 4):
+        academic_year = f"{year}-{year + 1}"
+        years.append({
+            'value': academic_year,
+            'label': academic_year,
+            'selected': year == current_year
+        })
+    # Sort in descending order (most recent first)
+    years.sort(key=lambda x: x['value'], reverse=True)
+    return years
+
 def login(request):
     # If user is already logged in, redirect to dashboard
     if request.user.is_authenticated:
@@ -241,7 +257,10 @@ def upload_results(request):
         academic_year = request.POST.get('academic_year')
         if not academic_year:
             messages.error(request, 'Please provide the Academic Year')
-            return render(request, 'upload_results.html', {'existing_pdfs': existing_pdfs})
+            return render(request, 'upload_results.html', {
+                'existing_pdfs': existing_pdfs,
+                'academic_years': get_academic_years()
+            })
 
         # Create base directories if they don't exist
         base_dir = os.path.join('student_api', 'text_recognition', 'data')
@@ -309,10 +328,16 @@ def upload_results(request):
         if not files_uploaded:
             messages.error(request, 'Please upload at least one file')
         
-        return render(request, 'upload_results.html', {'existing_pdfs': existing_pdfs})
+        return render(request, 'upload_results.html', {
+            'existing_pdfs': existing_pdfs,
+            'academic_years': get_academic_years()
+        })
 
     # For GET requests, show upload form with existing PDFs
-    return render(request, 'upload_results.html', {'existing_pdfs': existing_pdfs})
+    return render(request, 'upload_results.html', {
+        'existing_pdfs': existing_pdfs,
+        'academic_years': get_academic_years()
+    })
 
 @login_required
 def view_charts(request):

@@ -195,9 +195,11 @@ class ResultAnalyzer:
                 'roll_no': group['roll_no'].iloc[0],
                 'name': name,
                 '184': 0, '085': 0, '241': 0,
-                '086': 0, '087': 0, '402': 0
+                '086': 0, '087': 0, '402': 0,
+                'status': 'Pass'  # Default status
             }
             
+            # Get marks for all subjects
             for _, row in group.iterrows():
                 subject_code = row['Subject Code']
                 if subject_code in student_data:
@@ -205,21 +207,35 @@ class ResultAnalyzer:
                     if total_marks > student_data[subject_code]:
                         student_data[subject_code] = total_marks
             
-            # Calculate best of 5
+            # Get all subject marks and sort them
             subject_marks = []
+            failed_subjects = []
             for code in ['184', '085', '241', '086', '087', '402']:
-                if student_data[code] > 0:
-                    subject_marks.append((code, student_data[code]))
+                marks = student_data[code]
+                subject_marks.append((code, marks))
+                if marks < 33:
+                    failed_subjects.append(code)
             
+            # Sort marks in descending order
             subject_marks.sort(key=lambda x: x[1], reverse=True)
             best_5_subjects = subject_marks[:5]
+            worst_subject = subject_marks[5] if len(subject_marks) > 5 else None
             
+            # Calculate best of 5 and determine status
             if len(best_5_subjects) >= 5:
                 student_data['best_of_5'] = sum(mark for _, mark in best_5_subjects)
                 student_data['percentage'] = round(student_data['best_of_5'] / 500 * 100, 2)
+                
+                # Check for compartment case
+                best_5_failed = any(mark < 33 for _, mark in best_5_subjects)
+                if not best_5_failed and worst_subject and worst_subject[1] < 33:
+                    student_data['status'] = 'Compartment'
+                elif len(failed_subjects) > 0:
+                    student_data['status'] = 'Fail'
             else:
                 student_data['best_of_5'] = 0
                 student_data['percentage'] = 0
+                student_data['status'] = 'Fail'
             
             simplified_results.append(student_data)
         
@@ -252,8 +268,13 @@ class ResultAnalyzer:
             row['>60'] = len(subject_marks[(subject_marks > 60) & (subject_marks <= 70)])
             row['>50'] = len(subject_marks[(subject_marks > 50) & (subject_marks <= 60)])
             row['>33'] = len(subject_marks[(subject_marks > 33) & (subject_marks <= 50)])
-            row['Compartment'] = len(subject_marks[(subject_marks > 0) & (subject_marks < 33)])
-            row['Fail'] = len(subject_marks[subject_marks == 0])
+            
+            # Compartment is now calculated based on student status
+            compartment_students = len(results_df[results_df['status'] == 'Compartment'])
+            fail_students = len(results_df[results_df['status'] == 'Fail'])
+            
+            row['Compartment'] = compartment_students
+            row['Fail'] = fail_students
             
             # Calculate API
             if total_students > 0:
@@ -380,7 +401,7 @@ class ResultAnalyzer:
         
         # Generate API summary table
         api_table = self.generate_api_table(simplified_results)
-        api_table_path = os.path.join(output_dir, 'subject_api', 'Subject_Wise_API_Summary.csv')
+        api_table_path = os.path.join(output_dir, '10th_api_summary.csv')
         api_table.to_csv(api_table_path, index=False)
         print(f"\nSaved subject-wise API summary to: {api_table_path}")
         
