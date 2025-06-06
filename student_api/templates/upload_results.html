@@ -4,21 +4,67 @@
 {% block title %}Upload Results - Academic Performance Indicator{% endblock %}
 
 {% block content %}
-<!-- Navigation Bar -->
-<nav class="navbar">
-    <div class="nav-container">
-        <a href="/" class="nav-brand">
-            <img src="{% static 'images/aps-logo.png' %}" alt="APS Logo">
-            <span>APS Khadakwasla</span>
-        </a>
-        <div class="user-info">
-            <span style="color: white;">Welcome, <strong>{{ request.user.username }}</strong></span>
-        </div>
-    </div>
-</nav>
-
 <!-- Main Content -->
 <div class="main-content">
+    <div class="page-header">
+        <h1>Upload Results</h1>
+        <a href="{% url 'dashboard' %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Instructions Card -->
+    <div class="instructions-card">
+        <div class="card-header">
+            <h2><i class="fas fa-info-circle"></i> Instructions</h2>
+        </div>
+        <div class="card-body">
+            <div class="instructions-grid">
+                <div class="instruction-section">
+                    <h3><i class="fas fa-file-pdf"></i> File Requirements</h3>
+                    <ul>
+                        <li>Only PDF files are accepted</li>
+                        <li>Each file should contain results for a single class</li>
+                        <li>Make sure the PDF is clear and readable</li>
+                    </ul>
+                </div>
+
+                <div class="instruction-section">
+                    <h3><i class="fas fa-upload"></i> Upload Process</h3>
+                    <ol>
+                        <li>Select the Academic Year from the dropdown</li>
+                        <li>Click "Choose PDF" for the respective class</li>
+                        <li>Verify the selected file name</li>
+                        <li>Click "Upload Results" to submit</li>
+                        <li>Wait for the success message</li>
+                    </ol>
+                </div>
+
+                <div class="instruction-section">
+                    <h3><i class="fas fa-exclamation-circle"></i> Important Notes</h3>
+                    <ul>
+                        <li>Uploading a new file will replace any existing file for that class</li>
+                        <li>The system will automatically process the results after upload</li>
+                        <li>You can view the processed results in the dashboard</li>
+                        <li>Make sure to check the file list below for existing uploads</li>
+                    </ul>
+                </div>
+
+                <div class="instruction-section alert-info">
+                    <h3><i class="fas fa-cogs"></i> Processing Information</h3>
+                    <p>After upload, the system will:</p>
+                    <ul>
+                        <li>Extract student information and marks</li>
+                        <li>Calculate subject-wise API</li>
+                        <li>Generate performance reports</li>
+                        <li>Update the dashboard statistics</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {% if messages %}
     <div class="messages">
         {% for message in messages %}
@@ -29,14 +75,6 @@
         {% endfor %}
     </div>
     {% endif %}
-
-    <div class="page-header">
-        <h1>Upload Results</h1>
-        <a href="{% url 'dashboard' %}" class="back-btn">
-            <i class="fas fa-arrow-left"></i>
-            Back to Dashboard
-        </a>
-    </div>
 
     <div class="upload-container">
         <form id="uploadForm" method="post" enctype="multipart/form-data">
@@ -152,51 +190,11 @@
         flex-direction: column;
     }
 
-    /* Navigation Styles */
-    .navbar {
-        background: #1e3c72;
-        padding: 0.3rem 2rem;
-        position: fixed;
-        top: 0;
-        width: 100%;
-        z-index: 1000;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        height: 50px;
-        display: flex;
-        align-items: center;
-    }
-
-    .nav-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-    }
-
-    .nav-brand {
-        display: flex;
-        align-items: center;
-        text-decoration: none;
-        color: white;
-    }
-
-    .nav-brand img {
-        height: 30px;
-        margin-right: 12px;
-    }
-
-    .nav-brand span {
-        font-size: 1.1rem;
-        font-weight: 500;
-    }
-
     /* Main Content Styles */
     .main-content {
-        margin-top: 60px;
+        margin-top: 40px;
         flex: 1;
-        padding: 1.5rem;
+        padding: 1rem;
         max-width: 1200px;
         margin-left: auto;
         margin-right: auto;
@@ -205,9 +203,9 @@
 
     .page-header {
         background: white;
-        padding: 1rem 1.5rem;
+        padding: 0.75rem 1rem;
         border-radius: 10px;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         display: flex;
         justify-content: space-between;
@@ -216,7 +214,8 @@
 
     .page-header h1 {
         color: #1e3c72;
-        font-size: 1.8rem;
+        font-size: 1.5rem;
+        margin: 0;
     }
 
     .back-btn {
@@ -236,8 +235,9 @@
     .upload-container {
         background: white;
         border-radius: 15px;
-        padding: 2rem;
+        padding: 1.5rem;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-top: 1rem;
     }
 
     .form-group {
@@ -430,11 +430,6 @@
     }
 
     @media (max-width: 768px) {
-        .navbar {
-            padding: 0.3rem 1rem;
-            height: 45px;
-        }
-
         .main-content {
             margin-top: 45px;
             padding: 1rem;
@@ -455,9 +450,9 @@
     .existing-pdfs-container {
         background: white;
         border-radius: 15px;
-        padding: 2rem;
+        padding: 1.5rem;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        margin-top: 2rem;
+        margin-top: 1rem;
     }
 
     .section-header {
@@ -569,6 +564,114 @@
     .refresh-btn.rotating i {
         transform: rotate(360deg);
     }
+
+    /* Instructions Card Styles */
+    .instructions-card {
+        background: white;
+        border-radius: 15px;
+        margin: 1rem 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .instructions-card .card-header {
+        background: #1e3c72;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .instructions-card .card-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .instructions-card .card-body {
+        padding: 1.5rem;
+    }
+
+    .instructions-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .instruction-section {
+        margin: 0;
+        padding: 1rem;
+        border-radius: 10px;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        height: 100%;
+    }
+
+    .instruction-section h3 {
+        color: #1e3c72;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .instruction-section h3 i {
+        font-size: 1.1rem;
+        opacity: 0.8;
+    }
+
+    .instruction-section ul,
+    .instruction-section ol {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .instruction-section li {
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+        color: #495057;
+    }
+
+    .instruction-section li:last-child {
+        margin-bottom: 0;
+    }
+
+    .instruction-section.alert-info {
+        background-color: #e8f4f8;
+        border-color: #bee5eb;
+    }
+
+    .instruction-section.alert-info h3 {
+        color: #0c5460;
+    }
+
+    @media (max-width: 992px) {
+        .instructions-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .instruction-section {
+            margin-bottom: 0;
+        }
+
+        .instructions-card .card-body {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .instructions-card .card-body {
+            padding: 1rem;
+        }
+
+        .instruction-section {
+            padding: 1rem;
+        }
+    }
 </style>
 
 <script>
@@ -576,6 +679,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const uploadForm = document.getElementById('uploadForm');
     const errorMessage = document.getElementById('errorMessage');
     const academicYearSelect = document.getElementById('academic_year');
+
+    // Auto-hide Django messages after 5 seconds
+    const messages = document.querySelectorAll('.alert');
+    messages.forEach(function(alert) {
+        setTimeout(function() {
+            alert.style.opacity = '0';
+            setTimeout(function() {
+                alert.style.display = 'none';
+            }, 300);
+        }, 5000);
+    });
 
     // Load PDF files on page load
     loadPDFFiles();
@@ -638,20 +752,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function showAlert(message, type) {
     const messages = document.querySelector('.messages');
-    messages.innerHTML = `
-        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `;
+    messages.appendChild(alertDiv);
 
-    // Auto-hide alert after 7 seconds
-    setTimeout(() => {
-        const alerts = messages.getElementsByClassName('alert');
-        for(let alert of alerts) {
-            alert.style.display = 'none';
-        }
-    }, 7000);
+    // Auto-hide after 5 seconds with fade effect
+    setTimeout(function() {
+        alertDiv.style.transition = 'opacity 0.3s ease';
+        alertDiv.style.opacity = '0';
+        setTimeout(function() {
+            alertDiv.remove();
+        }, 300);
+    }, 5000);
 }
 
 function refreshPDFList() {
