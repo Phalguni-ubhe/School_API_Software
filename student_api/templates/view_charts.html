@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}View Charts - Academic Performance Indicator{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <h1 class="welcome-title">Results Charts</h1>
+    <p class="welcome-description">Visualize student performance trends and academic progress through interactive charts and graphs.</p>
+</div>
+
+<div class="chart-controls">
+    <div class="control-group">
+        <label for="academicYear">Academic Year:</label>
+        <select id="academicYear" class="select-input">
+            <option value="">Select Academic Year</option>
+            <option value="2025-2026">2025-2026</option>
+            <option value="2024-2025">2024-2025</option>
+            <option value="2023-2024">2023-2024</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label for="chartType">Chart Type:</label>
+        <select id="chartType" class="select-input">
+            <option value="bar">Bar Chart</option>
+            <option value="line">Line Chart</option>
+            <option value="progressive">Progressive Chart</option>
+        </select>
+    </div>
+    <button id="generateChart" class="generate-btn" disabled>Generate Chart</button>
+</div>
+
+<div class="chart-container">
+    <canvas id="apiChart"></canvas>
+</div>
+
+<style>
+    .welcome-section {
+        text-align: center;
+        max-width: 800px;
+        margin: 80px auto 2rem; /* Added top margin to account for navbar height */
+        padding: 0 1.5rem;
+    }
+
+    .welcome-title {
+        color: #1e3c72;
+        font-size: 2.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .welcome-description {
+        color: #666;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        max-width: 700px;
+        margin: 0 auto 2rem;
+    }
+
+    .chart-controls {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        gap: 1.5rem;
+        align-items: flex-end;
+    }
+
+    .control-group {
+        flex: 1;
+    }
+
+    .control-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .select-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        color: #333;
+        background-color: white;
+        cursor: pointer;
+    }
+
+    .select-input:focus {
+        outline: none;
+        border-color: #1e3c72;
+        box-shadow: 0 0 0 2px rgba(30, 60, 114, 0.1);
+    }
+
+    .generate-btn {
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 150px;
+    }
+
+    .generate-btn:hover {
+        background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+        transform: translateY(-1px);
+    }
+
+    .generate-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .chart-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .welcome-section {
+            margin-top: 70px; /* Slightly less margin for mobile as navbar is smaller */
+        }
+
+        .chart-controls {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .generate-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const academicYearSelect = document.getElementById('academicYear');
+    const chartTypeSelect = document.getElementById('chartType');
+    const generateButton = document.getElementById('generateChart');
+    const ctx = document.getElementById('apiChart').getContext('2d');
+    let currentChart = null;
+    let yearMultiplier = 0;
+
+    // Enable/disable generate button and handle changes
+    function updateGenerateButton() {
+        generateButton.disabled = !academicYearSelect.value;
+    }
+
+    // Add event listener for year selection to enable/disable generate button
+    academicYearSelect.addEventListener('change', function() {
+        updateGenerateButton();
+    });
+
+    // Initial state for the chart
+    generateButton.disabled = true;
+    function getDummyData(year) {
+        // Simulate different data for different academic years
+        const yearMultiplier = parseInt(year.split('-')[0]) - 2023;
+        return {
+            labels: ['English', 'Hindi', 'Mathematics', 'Science', 'Social Science', 'IT'],
+            datasets: [
+                {
+                    label: 'Class Average API',
+                    data: [
+                        Math.min(100, 85 + yearMultiplier * 2),
+                        Math.min(100, 78 + yearMultiplier * 3),
+                        Math.min(100, 82 + yearMultiplier * 2),
+                        Math.min(100, 88 + yearMultiplier),
+                        Math.min(100, 76 + yearMultiplier * 4),
+                        Math.min(100, 90 + yearMultiplier)
+                    ],
+                    backgroundColor: 'rgba(30, 60, 114, 0.5)',
+                    borderColor: '#1e3c72',
+                    borderWidth: 2
+                },
+                {
+                    label: 'Individual Student API',
+                    data: [
+                        Math.min(100, 90 + yearMultiplier * 1.5),
+                        Math.min(100, 85 + yearMultiplier * 2),
+                        Math.min(100, 88 + yearMultiplier * 2.5),
+                        Math.min(100, 92 + yearMultiplier),
+                        Math.min(100, 80 + yearMultiplier * 3),
+                        Math.min(100, 95 + yearMultiplier)
+                    ],
+                    backgroundColor: 'rgba(42, 82, 152, 0.5)',
+                    borderColor: '#2a5298',
+                    borderWidth: 2
+                }
+            ]
+        };
+    }
+
+    // Generate chart function
+    function generateChart() {
+        const chartType = chartTypeSelect.value;
+        const year = academicYearSelect.value;
+
+        if (!year) return; // Don't generate if no year selected
+
+        // Show loading state
+        const container = document.querySelector('.chart-container');
+        container.style.opacity = '0.5';
+        generateButton.disabled = true;
+
+        // Destroy existing chart if it exists
+        if (currentChart) {
+            currentChart.destroy();
+        }
+
+        // Get data for the selected year
+        const chartData = getDummyData(year);
+
+        // Configure chart based on type
+        let chartConfig = {
+            type: chartType === 'progressive' ? 'line' : chartType,
+            data: chartData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: `API Performance Chart (${year})`,
+                        font: {
+                            size: 16
+                        }
+                    }
+                }
+            }
+        };
+
+        // Special configuration for progressive chart
+        if (chartType === 'progressive') {
+            chartConfig.options.scales.y.max = undefined;
+            chartConfig.data.labels = ['Term 1', 'Term 2', 'Term 3', 'Final'];
+            const baseScore = 75 + (yearMultiplier * 2);
+            chartConfig.data.datasets = [{
+                label: 'Student Performance Over Time',
+                data: [
+                    Math.min(100, baseScore),
+                    Math.min(100, baseScore + 7),
+                    Math.min(100, baseScore + 13),
+                    Math.min(100, baseScore + 17)
+                ],
+                borderColor: '#1e3c72',
+                backgroundColor: 'rgba(30, 60, 114, 0.1)',
+                tension: 0.4,
+                fill: true
+            }];
+        }
+
+        // Create new chart with animation
+        setTimeout(() => {
+            currentChart = new Chart(ctx, chartConfig);
+            container.style.opacity = '1';
+            generateButton.disabled = !academicYearSelect.value;
+        }, 300);
+    }
+
+    generateButton.addEventListener('click', generateChart);
+
+    // Add loading animation to chart container
+    const container = document.querySelector('.chart-container');
+    container.style.transition = 'opacity 0.3s ease';
+});
+</script>
+{% endblock %}
