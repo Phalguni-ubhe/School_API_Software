@@ -1,0 +1,126 @@
+INFO 2025-06-05 22:06:55,230 views Login attempt for username: admin
+WARNING 2025-06-05 22:06:56,501 views Failed login attempt for username: admin
+INFO 2025-06-05 22:06:59,590 views Login attempt for username: admin14
+WARNING 2025-06-05 22:07:00,744 views Failed login attempt for username: admin14
+INFO 2025-06-05 22:07:20,477 views Login attempt for username: admin14
+INFO 2025-06-05 22:07:22,561 views Generated OTP for user admin14
+INFO 2025-06-05 22:07:22,562 views Attempting to send OTP email to shreyas.v4380@gmail.com
+INFO 2025-06-05 22:07:23,475 views Login attempt for username: admin14
+INFO 2025-06-05 22:07:24,462 views Login attempt for username: admin14
+INFO 2025-06-05 22:07:24,614 views Generated OTP for user admin14
+INFO 2025-06-05 22:07:24,616 views Attempting to send OTP email to shreyas.v4380@gmail.com
+INFO 2025-06-05 22:07:24,861 views Login attempt for username: admin14
+INFO 2025-06-05 22:07:25,278 views Login attempt for username: admin14
+INFO 2025-06-05 22:07:25,578 views Generated OTP for user admin14
+INFO 2025-06-05 22:07:25,579 views Attempting to send OTP email to shreyas.v4380@gmail.com
+INFO 2025-06-05 22:07:26,149 views Generated OTP for user admin14
+INFO 2025-06-05 22:07:26,150 views Attempting to send OTP email to shreyas.v4380@gmail.com
+INFO 2025-06-05 22:07:26,331 views Generated OTP for user admin14
+INFO 2025-06-05 22:07:26,332 views Attempting to send OTP email to shreyas.v4380@gmail.com
+INFO 2025-06-05 22:07:26,844 views Successfully sent OTP email to shreyas.v4380@gmail.com
+INFO 2025-06-05 22:07:28,366 views Successfully sent OTP email to shreyas.v4380@gmail.com
+INFO 2025-06-05 22:07:29,203 views Successfully sent OTP email to shreyas.v4380@gmail.com
+INFO 2025-06-05 22:07:30,069 views Successfully sent OTP email to shreyas.v4380@gmail.com
+INFO 2025-06-05 22:07:30,250 views Successfully sent OTP email to shreyas.v4380@gmail.com
+INFO 2025-06-05 22:10:56,578 views Login attempt for username: admin14
+INFO 2025-06-05 22:10:57,562 views Generated OTP for user admin14
+INFO 2025-06-05 22:10:57,562 views Attempting to send OTP email to shreyas.v4380@gmail.com
+INFO 2025-06-05 22:11:01,103 views Successfully sent OTP email to shreyas.v4380@gmail.com
+INFO 2025-06-12 15:25:41,243 views Login attempt for username: slashone
+INFO 2025-06-12 15:25:42,636 views Login attempt for username: slashone
+WARNING 2025-06-12 15:25:57,328 views Failed login attempt for username: slashone
+WARNING 2025-06-12 15:25:59,065 views Failed login attempt for username: slashone
+INFO 2025-06-12 15:46:42,171 views Generated OTP for password reset: admin14
+INFO 2025-06-12 15:46:43,678 views Generated OTP for password reset: admin14
+INFO 2025-06-12 15:46:44,794 views Generated OTP for password reset: admin14
+INFO 2025-06-12 15:46:47,427 views Successfully sent password reset OTP to shreyas.v4380@gmail.com
+INFO 2025-06-12 15:46:48,697 views Successfully sent password reset OTP to shreyas.v4380@gmail.com
+INFO 2025-06-12 15:46:50,451 views Successfully sent password reset OTP to shreyas.v4380@gmail.com
+INFO 2025-06-12 17:19:26,274 views Login attempt for username: slash1
+INFO 2025-06-12 17:19:27,045 views Login attempt for username: slash1
+INFO 2025-06-12 17:19:28,260 views Generated OTP for user slash1
+INFO 2025-06-12 17:19:28,260 views Attempting to send OTP email to bhargavaphadke@gmail.com
+INFO 2025-06-12 17:19:28,870 views Generated OTP for user slash1
+INFO 2025-06-12 17:19:28,870 views Attempting to send OTP email to bhargavaphadke@gmail.com
+INFO 2025-06-12 17:19:29,604 views Login attempt for username: slash1
+INFO 2025-06-12 17:19:31,177 views Generated OTP for user slash1
+INFO 2025-06-12 17:19:31,177 views Attempting to send OTP email to bhargavaphadke@gmail.com
+INFO 2025-06-12 17:19:35,062 views Successfully sent OTP email to bhargavaphadke@gmail.com
+INFO 2025-06-12 17:19:35,120 views Successfully sent OTP email to bhargavaphadke@gmail.com
+INFO 2025-06-12 17:19:36,523 views Successfully sent OTP email to bhargavaphadke@gmail.com
+INFO 2025-06-12 18:44:48,484 views Login attempt for username: slash1
+INFO 2025-06-12 18:44:49,548 views Login attempt for username: slash1
+INFO 2025-06-12 18:44:49,741 views Generated OTP for user slash1
+INFO 2025-06-12 18:44:49,741 views Attempting to send OTP email to bhargavaphadke@gmail.com
+INFO 2025-06-12 18:44:50,684 views Generated OTP for user slash1
+INFO 2025-06-12 18:44:50,685 views Attempting to send OTP email to bhargavaphadke@gmail.com
+ERROR 2025-06-12 18:44:54,512 views Failed to send OTP email: Connection unexpectedly closed
+ERROR 2025-06-12 18:44:54,512 views Failed to send OTP email: Connection unexpectedly closed
+ERROR 2025-06-12 18:44:54,605 views Full traceback: Traceback (most recent call last):
+  File "B:\Personel\Project Work\School-API-Software\NEW! HOT!\School_API_Software-yash\student_api\views.py", line 76, in login
+    send_mail(
+  File "C:\Users\bharg\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\django\core\mail\__init__.py", line 88, in send_mail
+    return mail.send()
+           ^^^^^^^^^^^
+  File "C:\Users\bharg\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\django\core\mail\message.py", line 301, in send
+    return self.get_connection(fail_silently).send_messages([self])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bharg\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\django\core\mail\backends\smtp.py", line 136, in send_messages
+    sent = self._send(message)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bharg\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\django\core\mail\backends\smtp.py", line 155, in _send
+    self.connection.sendmail(
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\smtplib.py", line 892, in sendmail
+    (code, resp) = self.rcpt(each, rcpt_options)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\smtplib.py", line 554, in rcpt
+    return self.getreply()
+           ^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\smtplib.py", line 405, in getreply
+    raise SMTPServerDisconnected("Connection unexpectedly closed")
+smtplib.SMTPServerDisconnected: Connection unexpectedly closed
+
+ERROR 2025-06-12 18:44:54,606 views Full traceback: Traceback (most recent call last):
+  File "B:\Personel\Project Work\School-API-Software\NEW! HOT!\School_API_Software-yash\student_api\views.py", line 76, in login
+    send_mail(
+  File "C:\Users\bharg\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\django\core\mail\__init__.py", line 88, in send_mail
+    return mail.send()
+           ^^^^^^^^^^^
+  File "C:\Users\bharg\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\django\core\mail\message.py", line 301, in send
+    return self.get_connection(fail_silently).send_messages([self])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bharg\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\django\core\mail\backends\smtp.py", line 136, in send_messages
+    sent = self._send(message)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bharg\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\django\core\mail\backends\smtp.py", line 155, in _send
+    self.connection.sendmail(
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\smtplib.py", line 902, in sendmail
+    (code, resp) = self.data(msg)
+                   ^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\smtplib.py", line 567, in data
+    (code, repl) = self.getreply()
+                   ^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\smtplib.py", line 405, in getreply
+    raise SMTPServerDisconnected("Connection unexpectedly closed")
+smtplib.SMTPServerDisconnected: Connection unexpectedly closed
+
+INFO 2025-06-12 18:45:06,489 views Login attempt for username: slash1
+INFO 2025-06-12 18:45:09,437 views Generated OTP for user slash1
+INFO 2025-06-12 18:45:09,438 views Attempting to send OTP email to bhargavaphadke@gmail.com
+INFO 2025-06-12 18:45:34,826 views Login attempt for username: slash1
+INFO 2025-06-12 18:45:36,227 views Generated OTP for user slash1
+INFO 2025-06-12 18:45:36,228 views Attempting to send OTP email to bhargavaphadke@gmail.com
+INFO 2025-06-12 18:45:36,614 views Successfully sent OTP email to bhargavaphadke@gmail.com
+INFO 2025-06-12 18:45:43,003 views Successfully sent OTP email to bhargavaphadke@gmail.com
+INFO 2025-06-12 20:35:34,961 views Login attempt for username: slash1
+INFO 2025-06-12 20:35:35,958 views Generated OTP for user slash1
+INFO 2025-06-12 20:35:35,959 views Attempting to send OTP email to bhargavaphadke@gmail.com
+INFO 2025-06-12 20:35:39,893 views Successfully sent OTP email to bhargavaphadke@gmail.com
+INFO 2025-06-12 21:01:00,596 views Login attempt for username: slash1
+INFO 2025-06-12 21:01:01,648 views Generated OTP for user slash1
+INFO 2025-06-12 21:01:01,648 views Attempting to send OTP email to bhargavaphadke@gmail.com
+INFO 2025-06-12 21:01:05,475 views Successfully sent OTP email to bhargavaphadke@gmail.com
+INFO 2025-06-12 21:29:04,437 views Login attempt for username: slash1
+INFO 2025-06-12 21:29:05,626 views Generated OTP for user slash1
+INFO 2025-06-12 21:29:05,627 views Attempting to send OTP email to bhargavaphadke@gmail.com
+INFO 2025-06-12 21:29:09,348 views Successfully sent OTP email to bhargavaphadke@gmail.com
