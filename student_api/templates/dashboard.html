@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Academic Performance Indicator{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-title {
+        text-align: center;
+        color: #1e3c72;
+        font-size: 2.5rem;
+        font-weight: 600;
+        margin: 80px 0 3.5rem;  /* Increased bottom margin from 2rem to 3.5rem */
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .feature-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+
+    .feature-icon i {
+        font-size: 2rem;
+        color: white;
+    }
+
+    .feature-card h2 {
+        color: #1e3c72;
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+    }
+
+    .feature-card p {
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+    }
+
+    .feature-card .action-btn {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .feature-card .action-btn:hover {
+        transform: scale(1.05);
+    }
+
+    @media (max-width: 768px) {
+        .features-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            margin: 70px 0 2.5rem;  /* Increased bottom margin for mobile as well */
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="dashboard-title">Academic Performance Dashboard</h1>
+
+<div class="features-grid">
+    <!-- Download API Result Card -->
+    <div class="feature-card">
+        <div class="feature-icon">
+            <i class="fas fa-download"></i>
+        </div>
+        <h2>Download API Result</h2>
+        <p>Download the Academic Performance Indicator Result for comprehensive analysis and record-keeping.</p>
+        <button class="action-btn" id="downloadBtn">
+            <i class="fas fa-download"></i>
+            Download Report
+        </button>
+    </div>
+
+    <!-- Upload Results Card -->
+    <div class="feature-card">
+        <div class="feature-icon">
+            <i class="fas fa-upload"></i>
+        </div>
+        <h2>Upload Results</h2>
+        <p>Upload student results and academic records for processing and integration into the Academic Performance.</p>
+        <button class="action-btn" id="uploadBtn">
+            <i class="fas fa-upload"></i>
+            Upload Data
+        </button>
+    </div>
+
+    <!-- View Results as Charts Card -->
+    <div class="feature-card">
+        <div class="feature-icon">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <h2>View Results as Charts</h2>
+        <p>Visualize student results through interactive charts and graphs for better insights.</p>
+        <button class="action-btn" id="chartsBtn">
+            <i class="fas fa-chart-bar"></i>
+            View Charts
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add click handlers for the buttons
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+        window.location.href = "{% url 'download_report' %}";
+    });
+
+    document.getElementById('uploadBtn').addEventListener('click', function() {
+        window.location.href = "{% url 'upload_results' %}";
+    });
+
+    document.getElementById('chartsBtn').addEventListener('click', function() {
+        window.location.href = "{% url 'view_charts' %}";
+    });
+</script>
+{% endblock %}

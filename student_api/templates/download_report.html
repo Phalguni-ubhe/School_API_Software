@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Download Report - Academic Performance Indicator{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <h1 class="welcome-title">Download API Report</h1>
+    <p class="welcome-description">Access and download comprehensive Academic Performance Indicator reports for your students. Select an academic year to view detailed analysis, performance metrics, and statistical data that helps track student progress effectively.</p>
+</div>
+
+<div class="selection-container">
+    <div class="year-selector">
+        <select id="admissionYear" name="admissionYear" class="admission-year-select">
+            <option value="">Select Academic Year</option>
+            <option value="2025-2026">2025-2026</option>
+            <option value="2024-2025">2024-2025</option>
+            <option value="2023-2024">2023-2024</option>
+        </select>
+        <button id="viewResults" class="view-btn">View Results</button>
+    </div>
+</div>
+
+<div id="resultsSection" class="results-section" style="display: none;">
+    <!-- Results will be dynamically loaded here -->
+</div>
+
+<style>
+    .welcome-section {
+        text-align: center;
+        max-width: 800px;
+        margin: 80px auto 2rem;
+        padding: 0 1.5rem;
+    }
+
+    .welcome-title {
+        color: #1e3c72;
+        font-size: 2.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .welcome-description {
+        color: #666;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        max-width: 700px;
+        margin: 0 auto 2rem;
+    }
+
+    .selection-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .year-selector {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .admission-year-select {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        color: #333;
+        background-color: white;
+        cursor: pointer;
+    }
+
+    .admission-year-select:focus {
+        outline: none;
+        border-color: #1e3c72;
+        box-shadow: 0 0 0 2px rgba(30, 60, 114, 0.1);
+    }
+
+    .view-btn {
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .view-btn:hover {
+        background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+        transform: translateY(-1px);
+    }
+
+    .view-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .results-section {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .welcome-section {
+            margin-top: 70px;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const yearSelect = document.getElementById('admissionYear');
+    const viewButton = document.getElementById('viewResults');
+    const resultsSection = document.getElementById('resultsSection');
+
+    // Initially disable the view button
+    viewButton.disabled = true;
+
+    // Enable/disable view button based on selection
+    yearSelect.addEventListener('change', function() {
+        viewButton.disabled = !this.value;
+    });
+
+    // Handle view button click
+    viewButton.addEventListener('click', function() {
+        const selectedYear = yearSelect.value;
+        if (!selectedYear) return;
+
+        // Show the results section
+        resultsSection.style.display = 'block';
+
+        // TODO: Add AJAX call to fetch results for the selected year
+        // For now, we'll just show a loading message
+        resultsSection.innerHTML = '<p style="text-align: center;">Loading results for ' + selectedYear + '...</p>';
+    });
+});
+</script>
+{% endblock %}
