@@ -1,0 +1,14 @@
+Range,Points to be Awarded,no of students,POINTS
+>95,10,0,0
+90-94.99,8,2,16
+80-89.9,6,1,6
+70-79.9,4,0,0
+60-69.9,2,1,2
+50-59.99,0,0,0
+33-49.99,-1,0,0
+Compartment,-2,1,-2
+Fail,-3,0,0
+Total,,5,22
+
+API- ENGLISH,440.0
+Total Students,5

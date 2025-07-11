@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-01w$v4t01$v(bv!c#s=fbe=5+ocwuyyx*5z(*=6&ar-75ri(qy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -129,6 +129,10 @@ SESSION_SAVE_EVERY_REQUEST = True  # Update session on every request to keep it 
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'student_api', 'static'),
+]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media files (Uploaded files)
 MEDIA_URL = '/media/'
@@ -152,3 +156,33 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'studentsoft.smpt@gmail.com'
 EMAIL_HOST_PASSWORD = 'ajgpisphauxxkxin'  # App password without spaces
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# Logging Configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'student_api': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
