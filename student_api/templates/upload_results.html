@@ -622,6 +622,7 @@ function loadPDFFiles() {
                 'class_12_humanities': 'Class XII Humanities'
             };
 
+            let latest12th = {science: '', commerce: '', humanities: ''};
             for (const [className, displayName] of Object.entries(classes)) {
                 const files = data.files[className] || [];
                 const card = document.createElement('div');
@@ -641,7 +642,20 @@ function loadPDFFiles() {
                     </div>
                 `;
                 pdfGrid.appendChild(card);
+                // Track latest file for each 12th stream
+                if (className === 'class_12_science' && files.length) latest12th.science = files[files.length-1];
+                if (className === 'class_12_commerce' && files.length) latest12th.commerce = files[files.length-1];
+                if (className === 'class_12_humanities' && files.length) latest12th.humanities = files[files.length-1];
             }
+            // Add single button for all 12th streams
+            const all12thBtn = document.createElement('button');
+            all12thBtn.className = 'process-btn';
+            all12thBtn.innerHTML = '<i class="fas fa-cogs"></i> Process All Class XII Streams';
+            all12thBtn.style.marginTop = '2rem';
+            all12thBtn.onclick = function() {
+                processAll12thPDFs(latest12th);
+            };
+            pdfGrid.appendChild(all12thBtn);
         })
         .catch(error => {
             showAlert('Error loading PDF files: ' + error.message, 'error');
@@ -707,6 +721,60 @@ function processPDF(className, fileName) {
     })
     .finally(() => {
         // Reset button
+        processBtn.innerHTML = originalText;
+        processBtn.disabled = false;
+    });
+}
+
+function processAll12thPDFs(latest12th) {
+    const processBtn = event.target;
+    const originalText = processBtn.innerHTML;
+    processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    processBtn.disabled = true;
+
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const formData = new FormData();
+    formData.append('class_name', 'class_12_all');
+    formData.append('file_name', JSON.stringify(latest12th));
+
+    fetch('/process-pdf/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const messages = document.querySelector('.messages');
+            messages.innerHTML = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            console.log('Processing output:', data.api_results || data.output);
+        } else {
+            const messages = document.querySelector('.messages');
+            messages.innerHTML = `
+                <div class="alert alert-error alert-dismissible fade show" role="alert">
+                    ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        const messages = document.querySelector('.messages');
+        messages.innerHTML = `
+            <div class="alert alert-error alert-dismissible fade show" role="alert">
+                Error processing PDF: ${error.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+    })
+    .finally(() => {
         processBtn.innerHTML = originalText;
         processBtn.disabled = false;
     });
