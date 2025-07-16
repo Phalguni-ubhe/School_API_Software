@@ -59,7 +59,7 @@
                             <span class="file-status" id="status_10">No file chosen</span>
                         </td>
                         <td><span class="file-status" id="upload_status_10">-</span></td>
-                        <td><i class="fas fa-times file-action" onclick="clearFile('10')"></i></td>
+                        <td><button class="pdf-remove-btn" onclick="clearFileUpload('class_10', this)"><i class="fas fa-trash"></i> Remove</button></td>
                     </tr>
                     <tr>
                         <td>Class XII Science</td>
@@ -71,7 +71,7 @@
                             <span class="file-status" id="status_12_science">No file chosen</span>
                         </td>
                         <td><span class="file-status" id="upload_status_12_science">-</span></td>
-                        <td><i class="fas fa-times file-action" onclick="clearFile('12_science')"></i></td>
+                        <td><button class="pdf-remove-btn" onclick="clearFileUpload('class_12_science', this)"><i class="fas fa-trash"></i> Remove</button></td>
                     </tr>
                     <tr>
                         <td>Class XII Commerce</td>
@@ -83,7 +83,7 @@
                             <span class="file-status" id="status_12_commerce">No file chosen</span>
                         </td>
                         <td><span class="file-status" id="upload_status_12_commerce">-</span></td>
-                        <td><i class="fas fa-times file-action" onclick="clearFile('12_commerce')"></i></td>
+                        <td><button class="pdf-remove-btn" onclick="clearFileUpload('class_12_commerce', this)"><i class="fas fa-trash"></i> Remove</button></td>
                     </tr>
                     <tr>
                         <td>Class XII Humanities</td>
@@ -95,7 +95,7 @@
                             <span class="file-status" id="status_12_humanities">No file chosen</span>
                         </td>
                         <td><span class="file-status" id="upload_status_12_humanities">-</span></td>
-                        <td><i class="fas fa-times file-action" onclick="clearFile('12_humanities')"></i></td>
+                        <td><button class="pdf-remove-btn" onclick="clearFileUpload('class_12_humanities', this)"><i class="fas fa-trash"></i> Remove</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -417,9 +417,16 @@
     }
 
     .pdf-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .pdf-row {
+        display: flex;
+        flex-direction: row;
         gap: 1.5rem;
+        margin-bottom: 1.5rem;
     }
 
     .pdf-card {
@@ -427,6 +434,19 @@
         border-radius: 10px;
         padding: 1.5rem;
         border: 1px solid #e1e1e1;
+    }
+
+    .pdf-card-inline {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.2rem 1rem;
+        border: 1px solid #e1e1e1;
+        flex: 1 1 0;
+        min-width: 0;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
     }
 
     .pdf-card h3 {
@@ -511,6 +531,63 @@
 
     .refresh-btn.rotating i {
         transform: rotate(360deg);
+    }
+
+    .pdf-process-btn-row {
+        display: flex;
+        flex-direction: row;
+        gap: 2rem;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+    }
+
+    .pdf-process-btn {
+        background: #1e3c72;
+        color: white;
+        border: none;
+        padding: 0.7rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        box-shadow: 0 2px 8px rgba(30, 60, 114, 0.08);
+    }
+
+    .pdf-process-btn:disabled {
+        background: #bfc8da;
+        color: #fff;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    .pdf-process-btn:not(:disabled):hover {
+        background: #2a5298;
+        transform: translateY(-2px);
+    }
+
+    /* Remove Button Styles */
+    .pdf-remove-btn {
+        background: #dc3545;
+        color: #fff;
+        border: none;
+        padding: 0.3rem 0.8rem;
+        border-radius: 5px;
+        font-size: 0.85rem;
+        margin-left: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .pdf-remove-btn:disabled {
+        background: #e6a2a8;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+    .pdf-remove-btn:not(:disabled):hover {
+        background: #b71c1c;
     }
 </style>
 
@@ -613,7 +690,7 @@ function loadPDFFiles() {
         .then(response => response.json())
         .then(data => {
             const pdfGrid = document.getElementById('pdfGrid');
-            pdfGrid.innerHTML = ''; // Clear existing content
+            pdfGrid.innerHTML = '';
 
             const classes = {
                 'class_10': 'Class X',
@@ -623,60 +700,75 @@ function loadPDFFiles() {
             };
 
             let latest12th = {science: '', commerce: '', humanities: ''};
+            // Create a row for the 4 class cards
+            const row = document.createElement('div');
+            row.className = 'pdf-row';
             for (const [className, displayName] of Object.entries(classes)) {
                 const files = data.files[className] || [];
                 const card = document.createElement('div');
-                card.className = 'pdf-card';
+                card.className = 'pdf-card pdf-card-inline';
                 card.innerHTML = `
                     <h3>${displayName}</h3>
                     <div class="pdf-list">
                         ${files.length ? files.map(pdf => `
                             <div class="pdf-item">
                                 <i class="fas fa-file-pdf"></i>
-                                <span>${pdf}</span>
-                                <button class="process-btn" onclick="processPDF('${className}', '${pdf}')">
-                                    <i class="fas fa-cogs"></i> Process
-                                </button>
+                                <span title="${pdf}">${pdf.slice(0, 10)}${pdf.length > 10 ? '...' : ''}</span>
+                                <button class="pdf-remove-btn" onclick="removePDF('${className}', '${pdf}', this)"><i class='fas fa-trash'></i> Remove</button>
                             </div>
                         `).join('') : '<p class="no-files">No PDF files available</p>'}
                     </div>
                 `;
-                pdfGrid.appendChild(card);
+                row.appendChild(card);
                 // Track latest file for each 12th stream
                 if (className === 'class_12_science' && files.length) latest12th.science = files[files.length-1];
                 if (className === 'class_12_commerce' && files.length) latest12th.commerce = files[files.length-1];
                 if (className === 'class_12_humanities' && files.length) latest12th.humanities = files[files.length-1];
             }
-            // Add single button for all 12th streams
-            const all12thBtn = document.createElement('button');
-            all12thBtn.className = 'process-btn';
-            all12thBtn.innerHTML = '<i class="fas fa-cogs"></i> Process All Class XII Streams';
-            all12thBtn.style.marginTop = '2rem';
-            all12thBtn.onclick = function() {
-                processAll12thPDFs(latest12th);
+            pdfGrid.appendChild(row);
+            // Track latest file for Class 10th
+            let latest10th = '';
+            if (data.files['class_10'] && data.files['class_10'].length) {
+                latest10th = data.files['class_10'][data.files['class_10'].length-1];
+            }
+            // Add unified process buttons for Class 10th and Class 12th at the bottom
+            const btnContainer = document.createElement('div');
+            btnContainer.className = 'pdf-process-btn-row';
+            const process10thBtn = document.createElement('button');
+            process10thBtn.className = 'pdf-process-btn';
+            process10thBtn.innerHTML = 'Process Class X PDF';
+            process10thBtn.onclick = function(event) {
+                processLatest10thPDF(latest10th, event);
             };
-            pdfGrid.appendChild(all12thBtn);
+            process10thBtn.disabled = !latest10th;
+            btnContainer.appendChild(process10thBtn);
+            const process12thBtn = document.createElement('button');
+            process12thBtn.className = 'pdf-process-btn';
+            process12thBtn.innerHTML = 'Process All Class XII Streams';
+            process12thBtn.onclick = function(event) {
+                processAll12thPDFs(latest12th, event);
+            };
+            process12thBtn.disabled = !(latest12th.science || latest12th.commerce || latest12th.humanities);
+            btnContainer.appendChild(process12thBtn);
+            pdfGrid.appendChild(btnContainer);
         })
         .catch(error => {
             showAlert('Error loading PDF files: ' + error.message, 'error');
         });
 }
 
-function processPDF(className, fileName) {
+
+function processLatest10thPDF(latest10th, event) {
     const processBtn = event.target;
     const originalText = processBtn.innerHTML;
     processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     processBtn.disabled = true;
 
-    // Get CSRF token
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-    // Create form data
     const formData = new FormData();
-    formData.append('class_name', className);
-    formData.append('file_name', fileName);
+    formData.append('class_name', 'class_10');
+    formData.append('file_name', latest10th);
 
-    // Make AJAX call
     fetch('/process-pdf/', {
         method: 'POST',
         headers: {
@@ -686,21 +778,16 @@ function processPDF(className, fileName) {
     })
     .then(response => response.json())
     .then(data => {
+        const messages = document.querySelector('.messages');
         if (data.status === 'success') {
-            // Show success message
-            const messages = document.querySelector('.messages');
             messages.innerHTML = `
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     ${data.message}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             `;
-            
-            // You can handle the output here if needed
             console.log('Processing output:', data.output);
         } else {
-            // Show error message
-            const messages = document.querySelector('.messages');
             messages.innerHTML = `
                 <div class="alert alert-error alert-dismissible fade show" role="alert">
                     ${data.message}
@@ -710,7 +797,6 @@ function processPDF(className, fileName) {
         }
     })
     .catch(error => {
-        // Show error message
         const messages = document.querySelector('.messages');
         messages.innerHTML = `
             <div class="alert alert-error alert-dismissible fade show" role="alert">
@@ -720,13 +806,12 @@ function processPDF(className, fileName) {
         `;
     })
     .finally(() => {
-        // Reset button
         processBtn.innerHTML = originalText;
         processBtn.disabled = false;
     });
 }
 
-function processAll12thPDFs(latest12th) {
+function processAll12thPDFs(latest12th, event) {
     const processBtn = event.target;
     const originalText = processBtn.innerHTML;
     processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
@@ -746,8 +831,8 @@ function processAll12thPDFs(latest12th) {
     })
     .then(response => response.json())
     .then(data => {
+        const messages = document.querySelector('.messages');
         if (data.status === 'success') {
-            const messages = document.querySelector('.messages');
             messages.innerHTML = `
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     ${data.message}
@@ -756,7 +841,6 @@ function processAll12thPDFs(latest12th) {
             `;
             console.log('Processing output:', data.api_results || data.output);
         } else {
-            const messages = document.querySelector('.messages');
             messages.innerHTML = `
                 <div class="alert alert-error alert-dismissible fade show" role="alert">
                     ${data.message}
@@ -779,5 +863,51 @@ function processAll12thPDFs(latest12th) {
         processBtn.disabled = false;
     });
 }
+
+function removePDF(className, fileName, btn) {
+    if (!confirm(`Are you sure you want to delete this PDF?`)) return;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Removing...';
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const formData = new FormData();
+    formData.append('class_name', className);
+    formData.append('file_name', fileName);
+    fetch('/delete-pdf/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showAlert(data.message, 'success');
+            refreshPDFList();
+        } else {
+            showAlert(data.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-trash"></i> Remove';
+        }
+    })
+    .catch(error => {
+        showAlert('Error deleting PDF: ' + error.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-trash"></i> Remove';
+    });
+}
+
+function clearFileUpload(className, btn) {
+    // Clear the file input and status for the given class
+    const fileInput = document.getElementById(`file_${className.replace('class_', '')}`);
+    const statusSpan = document.getElementById(`status_${className.replace('class_', '')}`);
+    const uploadStatusSpan = document.getElementById(`upload_status_${className.replace('class_', '')}`);
+    if (fileInput) fileInput.value = '';
+    if (statusSpan) statusSpan.textContent = 'No file chosen';
+    if (uploadStatusSpan) {
+        uploadStatusSpan.textContent = '-';
+        uploadStatusSpan.className = 'file-status';
+    }
+}
 </script>
-{% endblock %} 
+{% endblock %}

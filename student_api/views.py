@@ -16,6 +16,7 @@ import os
 from datetime import datetime
 import subprocess
 import sys
+from django.views.decorators.csrf import csrf_exempt
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -487,3 +488,30 @@ def get_pdf_files_list(request):
         'class_12_humanities': get_pdf_files(os.path.join(base_dir, 'class_12_humanities'))
     }
     return JsonResponse({'files': existing_pdfs})
+
+@csrf_exempt
+def delete_pdf(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+    class_name = request.POST.get('class_name')
+    file_name = request.POST.get('file_name')
+    if not class_name or not file_name:
+        return JsonResponse({'status': 'error', 'message': 'Missing parameters.'})
+    # Map class_name to folder
+    folder_map = {
+        'class_10': os.path.join('student_api', 'text_recognition', 'data', 'class_10'),
+        'class_12_science': os.path.join('student_api', 'text_recognition', 'data', 'class_12_science'),
+        'class_12_commerce': os.path.join('student_api', 'text_recognition', 'data', 'class_12_commerce'),
+        'class_12_humanities': os.path.join('student_api', 'text_recognition', 'data', 'class_12_humanities'),
+    }
+    folder = folder_map.get(class_name)
+    if not folder:
+        return JsonResponse({'status': 'error', 'message': 'Invalid class name.'})
+    file_path = os.path.join(folder, file_name)
+    if not os.path.isfile(file_path):
+        return JsonResponse({'status': 'error', 'message': 'File not found.'})
+    try:
+        os.remove(file_path)
+        return JsonResponse({'status': 'success', 'message': f'{file_name} deleted successfully.'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': f'Error deleting file: {str(e)}'})
