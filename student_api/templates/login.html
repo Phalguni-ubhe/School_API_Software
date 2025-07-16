@@ -339,7 +339,7 @@
                 </form>
 
                 <!-- Forgot Password Form -->
-                <form method="post" action="{% url 'forgot_password' %}" id="forgotPasswordForm" class="forgot-password-section" style="display: none;">
+                <form method="post" action="#" id="forgotPasswordForm" class="forgot-password-section" style="display: none;">
                     {% csrf_token %}
                     <button type="button" class="back-btn" id="backToLoginFromForgot">
                         <i class="fas fa-arrow-left"></i> Back to Login
@@ -356,7 +356,7 @@
                 </form>
 
                 <!-- Reset Password Form -->
-                <form method="post" action="{% url 'reset_password' %}" id="resetPasswordForm" class="reset-password-section" style="display: none;">
+                <form method="post" action="#" id="resetPasswordForm" class="reset-password-section" style="display: none;">
                     {% csrf_token %}
                     <button type="button" class="back-btn" id="backToForgot">
                         <i class="fas fa-arrow-left"></i> Back
@@ -525,7 +525,7 @@
 
                 const formData = new FormData(forgotPasswordForm);
                 
-                fetch('{% url "forgot_password" %}', {
+                fetch('#', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -567,7 +567,7 @@
 
                 const formData = new FormData(resetPasswordForm);
                 
-                fetch('{% url "reset_password" %}', {
+                fetch('#', {
                     method: 'POST',
                     body: formData,
                     headers: {
