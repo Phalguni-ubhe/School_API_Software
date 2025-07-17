@@ -45,7 +45,6 @@
                         <th>Class</th>
                         <th>File Upload</th>
                         <th>Status</th>
-                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -59,7 +58,6 @@
                             <span class="file-status" id="status_10">No file chosen</span>
                         </td>
                         <td><span class="file-status" id="upload_status_10">-</span></td>
-                        <td><button class="pdf-remove-btn" onclick="clearFileUpload('class_10', this)"><i class="fas fa-trash"></i> Remove</button></td>
                     </tr>
                     <tr>
                         <td>Class XII Science</td>
@@ -71,7 +69,6 @@
                             <span class="file-status" id="status_12_science">No file chosen</span>
                         </td>
                         <td><span class="file-status" id="upload_status_12_science">-</span></td>
-                        <td><button class="pdf-remove-btn" onclick="clearFileUpload('class_12_science', this)"><i class="fas fa-trash"></i> Remove</button></td>
                     </tr>
                     <tr>
                         <td>Class XII Commerce</td>
@@ -83,7 +80,6 @@
                             <span class="file-status" id="status_12_commerce">No file chosen</span>
                         </td>
                         <td><span class="file-status" id="upload_status_12_commerce">-</span></td>
-                        <td><button class="pdf-remove-btn" onclick="clearFileUpload('class_12_commerce', this)"><i class="fas fa-trash"></i> Remove</button></td>
                     </tr>
                     <tr>
                         <td>Class XII Humanities</td>
@@ -95,7 +91,6 @@
                             <span class="file-status" id="status_12_humanities">No file chosen</span>
                         </td>
                         <td><span class="file-status" id="upload_status_12_humanities">-</span></td>
-                        <td><button class="pdf-remove-btn" onclick="clearFileUpload('class_12_humanities', this)"><i class="fas fa-trash"></i> Remove</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -632,27 +627,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle form submission
     uploadForm.addEventListener('submit', function(e) {
-        e.preventDefault();
         const academicYear = academicYearSelect.value.trim();
-
         if (!academicYear) {
             showAlert('Please select the Academic Year', 'error');
             academicYearSelect.focus();
+            e.preventDefault();
             return;
         }
-
         let hasFiles = false;
         document.querySelectorAll('input[type="file"]').forEach(input => {
             if (input.files.length > 0) hasFiles = true;
         });
-
         if (!hasFiles) {
             showAlert('Please select at least one PDF file to upload', 'error');
+            e.preventDefault();
             return;
         }
-
-        // Submit the form
-        this.submit();
+        // Let the browser submit the form normally
     });
 });
 

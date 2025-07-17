@@ -450,29 +450,35 @@
             backToLoginFromForgot.addEventListener('click', showLoginForm);
             backToForgot.addEventListener('click', showForgotPasswordForm);
 
-            // Function to show error message
-            function showError(message) {
-                let errorDiv = document.querySelector('.error-msg');
-                if (!errorDiv) {
-                    errorDiv = document.createElement('div');
-                    errorDiv.className = 'error-msg';
+            // Function to show message (success or error)
+            function showMessage(message, type = 'error') {
+                let msgDiv = document.querySelector('.alert-msg');
+                if (!msgDiv) {
+                    msgDiv = document.createElement('div');
+                    msgDiv.className = 'alert-msg';
                     const currentForm = otpForm.style.display === 'block' ? otpForm : loginForm;
-                    currentForm.insertBefore(errorDiv, currentForm.firstChild);
+                    currentForm.insertBefore(msgDiv, currentForm.firstChild);
                 }
-                errorDiv.textContent = message;
-                errorDiv.style.display = 'block';
-                
+                msgDiv.textContent = message;
+                msgDiv.style.display = 'block';
+                msgDiv.style.backgroundColor = type === 'success' ? '#e6ffe6' : '#ffe5e5';
+                msgDiv.style.color = type === 'success' ? '#198754' : '#dc3545';
+                msgDiv.style.padding = '1rem';
+                msgDiv.style.borderRadius = '8px';
+                msgDiv.style.marginBottom = '1.5rem';
+                msgDiv.style.fontSize = '14px';
+                msgDiv.style.textAlign = 'center';
                 // Auto-hide after 5 seconds
                 setTimeout(() => {
-                    errorDiv.style.display = 'none';
+                    msgDiv.style.display = 'none';
                 }, 5000);
             }
 
-            // Function to clear error message
+            // Function to clear message
             function clearError() {
-                const errorDiv = document.querySelector('.error-msg');
-                if (errorDiv) {
-                    errorDiv.style.display = 'none';
+                const msgDiv = document.querySelector('.alert-msg');
+                if (msgDiv) {
+                    msgDiv.style.display = 'none';
                 }
             }
 
@@ -525,7 +531,7 @@
 
                 const formData = new FormData(forgotPasswordForm);
                 
-                fetch('#', {
+                fetch('/forgot-password/', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -542,10 +548,10 @@
                 })
                 .then(data => {
                     if (data.success) {
+                        showMessage(data.message || 'OTP has been sent to your email.', 'success');
                         showResetPasswordForm();
-                        showError(data.message || 'OTP has been sent to your email.');
                     } else {
-                        showError(data.message || 'Error sending OTP. Please try again.');
+                        showMessage(data.message || 'Error sending OTP. Please try again.', 'error');
                     }
                 })
                 .catch(error => {
@@ -567,7 +573,7 @@
 
                 const formData = new FormData(resetPasswordForm);
                 
-                fetch('#', {
+                fetch('/reset-password/', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -584,12 +590,16 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        showError(data.message || 'Password reset successful.');
+                        showMessage(data.message || 'Password reset successful.', 'success');
                         setTimeout(() => {
                             showLoginForm();
+                            clearError();
                         }, 2000);
                     } else {
-                        showError(data.message || 'Error resetting password. Please try again.');
+                        showMessage(data.message || 'Error resetting password. Please try again.', 'error');
+                        setTimeout(() => {
+                            clearError();
+                        }, 5000);
                     }
                 })
                 .catch(error => {

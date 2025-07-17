@@ -1,5 +1,73 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth.hashers import make_password
+from django.views.decorators.csrf import csrf_exempt
+# --- Password Reset Views ---
+@csrf_exempt
+def forgot_password(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+    username = request.POST.get('username')
+    if not username:
+        return JsonResponse({'success': False, 'message': 'Username required.'})
+    try:
+        user = User.objects.get(username=username)
+        if not user.email:
+            return JsonResponse({'success': False, 'message': 'No email associated with this account.'})
+        # Generate OTP and send email
+        otp = OTP.generate_otp(user)
+        send_mail(
+            'Your Password Reset OTP',
+            f'Your OTP for password reset is: {otp}\nThis OTP will expire in 5 minutes.',
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+        # Store user id in session for reset
+        request.session['user_id_for_reset'] = user.id
+        return JsonResponse({'success': True, 'message': f'OTP sent to {user.email}'})
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'User not found.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Error: {str(e)}'})
+
+@csrf_exempt
+def reset_password(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+    username = request.POST.get('username')
+    otp = request.POST.get('otp')
+    new_password = request.POST.get('new_password')
+    confirm_password = request.POST.get('confirm_password')
+    if not (username and otp and new_password and confirm_password):
+        return JsonResponse({'success': False, 'message': 'All fields are required.'})
+    if new_password != confirm_password:
+        return JsonResponse({'success': False, 'message': 'Passwords do not match.'})
+    try:
+        user = User.objects.get(username=username)
+        # Find all OTPs for this user
+        otp_objs = OTP.objects.filter(user=user)
+        if not otp_objs.exists():
+            return JsonResponse({'success': False, 'message': 'OTP not found. Please request a new one.'})
+        # Find a valid OTP
+        valid_otp_obj = None
+        for otp_obj in otp_objs:
+            if otp_obj.is_valid() and otp_obj.otp == otp:
+                valid_otp_obj = otp_obj
+                break
+        if not valid_otp_obj:
+            return JsonResponse({'success': False, 'message': 'Invalid or expired OTP.'})
+        # Set new password
+        user.password = make_password(new_password)
+        user.is_active = True  # Ensure user is active after reset
+        user.save()
+        # Delete all OTPs for this user
+        otp_objs.delete()
+        return JsonResponse({'success': True, 'message': 'Password reset successful. You can now log in.'})
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'User not found.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Error: {str(e)}'})
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -54,7 +122,7 @@ def login(request):
         
         user = authenticate(request, username=username, password=password)
         
-        if user is not None and user.is_staff:  # Only allow staff/teachers to login
+        if user is not None and user.is_active:  # Allow any active user to login
             try:
                 # Check if user has an email
                 if not user.email:
@@ -120,9 +188,9 @@ def login(request):
             if is_ajax:
                 return JsonResponse({
                     'success': False,
-                    'message': 'Invalid credentials or insufficient permissions.'
+                    'message': 'Invalid credentials, inactive user, or insufficient permissions.'
                 })
-            messages.error(request, 'Invalid credentials or insufficient permissions.')
+            messages.error(request, 'Invalid credentials, inactive user, or insufficient permissions.')
             return render(request, 'login.html')
     
     return render(request, 'login.html')
