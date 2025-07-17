@@ -1,7 +1,0 @@
-Subject,SNO,Name of APS,Total Students in School as on 31 Mar 2025,No of students appeared,No of students pass,>95,>90,>80,>70,>60,>50,>33,Compartment,Fail,API
-ENGLISH,1,,,5,4,0,2,1,0,1,0,0,0,1,420.0
-HINDI,2,,,5,4,0,0,2,1,0,1,0,0,1,260.0
-MATHEMATICS,3,,,5,5,0,0,1,1,2,0,1,0,1,200.0
-SCIENCE,4,,,5,4,0,0,1,2,1,0,0,0,1,260.0
-SOCIAL SCIENCE,5,,,5,5,0,0,2,2,0,1,0,0,1,340.0
-IT,6,,,5,5,0,0,0,0,2,3,0,0,1,20.0

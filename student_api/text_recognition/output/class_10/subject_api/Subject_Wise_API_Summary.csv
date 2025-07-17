@@ -1,0 +1,7 @@
+SNO,Name of APS,Total Students,Appeared,Passed,>95,>90,>80,>70,>60,>50,>33,Compartment,Fail,API
+1,ENGLISH,5,5,4,0,0,0,3,0,1,0,1,0,2.0
+2,HINDI,5,5,4,0,0,0,0,3,0,1,1,0,0.6
+3,MATHEMATICS,5,5,5,0,0,0,0,1,2,1,0,0,0.2
+4,SCIENCE,5,5,4,0,0,0,1,1,1,1,1,0,0.6
+5,SOCIAL SCIENCE,5,5,5,0,0,0,0,3,1,1,0,0,1.0
+6,IT,0,0,0,0,0,0,0,0,0,0,0,0,#DIV/0!

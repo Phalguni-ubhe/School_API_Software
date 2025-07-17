@@ -31,4 +31,7 @@ urlpatterns = [
     path('results-view/', views.results_view, name='results_view'),
     path('process-pdf/', views.process_pdf, name='process_pdf'),
     path('get-pdf-files/', views.get_pdf_files_list, name='get_pdf_files'),
+    path('delete-pdf/', views.delete_pdf, name='delete-pdf'),
+    path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('reset-password/', views.reset_password, name='reset_password'),
 ]

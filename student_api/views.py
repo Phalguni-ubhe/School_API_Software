@@ -1,5 +1,73 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth.hashers import make_password
+from django.views.decorators.csrf import csrf_exempt
+# --- Password Reset Views ---
+@csrf_exempt
+def forgot_password(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+    username = request.POST.get('username')
+    if not username:
+        return JsonResponse({'success': False, 'message': 'Username required.'})
+    try:
+        user = User.objects.get(username=username)
+        if not user.email:
+            return JsonResponse({'success': False, 'message': 'No email associated with this account.'})
+        # Generate OTP and send email
+        otp = OTP.generate_otp(user)
+        send_mail(
+            'Your Password Reset OTP',
+            f'Your OTP for password reset is: {otp}\nThis OTP will expire in 5 minutes.',
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+        # Store user id in session for reset
+        request.session['user_id_for_reset'] = user.id
+        return JsonResponse({'success': True, 'message': f'OTP sent to {user.email}'})
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'User not found.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Error: {str(e)}'})
+
+@csrf_exempt
+def reset_password(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+    username = request.POST.get('username')
+    otp = request.POST.get('otp')
+    new_password = request.POST.get('new_password')
+    confirm_password = request.POST.get('confirm_password')
+    if not (username and otp and new_password and confirm_password):
+        return JsonResponse({'success': False, 'message': 'All fields are required.'})
+    if new_password != confirm_password:
+        return JsonResponse({'success': False, 'message': 'Passwords do not match.'})
+    try:
+        user = User.objects.get(username=username)
+        # Find all OTPs for this user
+        otp_objs = OTP.objects.filter(user=user)
+        if not otp_objs.exists():
+            return JsonResponse({'success': False, 'message': 'OTP not found. Please request a new one.'})
+        # Find a valid OTP
+        valid_otp_obj = None
+        for otp_obj in otp_objs:
+            if otp_obj.is_valid() and otp_obj.otp == otp:
+                valid_otp_obj = otp_obj
+                break
+        if not valid_otp_obj:
+            return JsonResponse({'success': False, 'message': 'Invalid or expired OTP.'})
+        # Set new password
+        user.password = make_password(new_password)
+        user.is_active = True  # Ensure user is active after reset
+        user.save()
+        # Delete all OTPs for this user
+        otp_objs.delete()
+        return JsonResponse({'success': True, 'message': 'Password reset successful. You can now log in.'})
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'User not found.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Error: {str(e)}'})
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -16,6 +84,7 @@ import os
 from datetime import datetime
 import subprocess
 import sys
+from django.views.decorators.csrf import csrf_exempt
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -53,7 +122,7 @@ def login(request):
         
         user = authenticate(request, username=username, password=password)
         
-        if user is not None and user.is_staff:  # Only allow staff/teachers to login
+        if user is not None and user.is_active:  # Allow any active user to login
             try:
                 # Check if user has an email
                 if not user.email:
@@ -119,9 +188,9 @@ def login(request):
             if is_ajax:
                 return JsonResponse({
                     'success': False,
-                    'message': 'Invalid credentials or insufficient permissions.'
+                    'message': 'Invalid credentials, inactive user, or insufficient permissions.'
                 })
-            messages.error(request, 'Invalid credentials or insufficient permissions.')
+            messages.error(request, 'Invalid credentials, inactive user, or insufficient permissions.')
             return render(request, 'login.html')
     
     return render(request, 'login.html')
@@ -369,53 +438,106 @@ def process_pdf(request):
         class_name = request.POST.get('class_name')
         file_name = request.POST.get('file_name')
         
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         if class_name == 'class_10':
+            analyzer_path = os.path.abspath(os.path.join(base_dir, 'student_api', 'text_recognition', 'src', 'class_10', 'test10th.py'))
+            pdf_path = os.path.abspath(os.path.join(base_dir, 'student_api', 'text_recognition', 'data', 'class_10', file_name))
+            pdf_files = [pdf_path]
+            analyzer_args = [sys.executable, analyzer_path] + pdf_files
+        elif class_name == 'class_12_all':
+            # Parse file_name from JSON string to dict
             try:
-                # Construct paths
-                pdf_path = os.path.join('student_api', 'text_recognition', 'data', 'class_10', file_name)
-                analyzer_path = os.path.join('student_api', 'text_recognition', 'src', 'class_10', 'result_analyzer.py')
-                
-                if not os.path.exists(analyzer_path):
-                    return JsonResponse({
-                        'status': 'error',
-                        'message': 'Result analyzer script not found'
-                    })
-                
-                if not os.path.exists(pdf_path):
-                    return JsonResponse({
-                        'status': 'error',
-                        'message': 'PDF file not found'
-                    })
-                
-                # Run the analyzer script
-                process = subprocess.Popen(
-                    [sys.executable, analyzer_path, pdf_path],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE
-                )
-                stdout, stderr = process.communicate()
-                
-                if process.returncode == 0:
-                    return JsonResponse({
-                        'status': 'success',
-                        'message': 'PDF processing completed successfully',
-                        'output': stdout.decode('utf-8')
-                    })
-                else:
-                    return JsonResponse({
-                        'status': 'error',
-                        'message': f'Error processing PDF: {stderr.decode("utf-8")}'
-                    })
-                    
-            except Exception as e:
+                file_name_dict = json.loads(file_name)
+            except Exception:
                 return JsonResponse({
                     'status': 'error',
-                    'message': f'Error: {str(e)}'
+                    'message': 'Invalid file_name format for class_12_all.'
                 })
+            analyzer_path = os.path.abspath(os.path.join(base_dir, 'student_api', 'text_recognition', 'src', 'class_12', 'test12th.py'))
+            pdf_files = []
+            if file_name_dict.get('science'):
+                pdf_science = os.path.abspath(os.path.join(base_dir, 'student_api', 'text_recognition', 'data', 'class_12_science', file_name_dict['science']))
+                pdf_files.append(pdf_science)
+            if file_name_dict.get('commerce'):
+                pdf_commerce = os.path.abspath(os.path.join(base_dir, 'student_api', 'text_recognition', 'data', 'class_12_commerce', file_name_dict['commerce']))
+                pdf_files.append(pdf_commerce)
+            if file_name_dict.get('humanities'):
+                pdf_humanities = os.path.abspath(os.path.join(base_dir, 'student_api', 'text_recognition', 'data', 'class_12_humanities', file_name_dict['humanities']))
+                pdf_files.append(pdf_humanities)
+            if not pdf_files:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'No valid Class XII PDF files found to process.'
+                })
+            analyzer_args = [sys.executable, analyzer_path] + pdf_files
         else:
             return JsonResponse({
                 'status': 'error',
                 'message': 'Processing not implemented for this class yet'
+            })
+
+        try:
+            if not os.path.exists(analyzer_path):
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Result analyzer script not found'
+                })
+
+            for pdf in pdf_files:
+                if not os.path.exists(pdf):
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': f'PDF file not found: {pdf}'
+                    })
+
+            # Run the analyzer script with all PDFs as arguments
+            process = subprocess.Popen(
+                analyzer_args,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            stdout, stderr = process.communicate()
+            # Log output for debugging
+            logger.info(f"Analyzer stdout: {stdout}")
+            logger.error(f"Analyzer stderr: {stderr}")
+
+            try:
+                output_text = stdout.decode('utf-8', errors='replace')
+            except Exception as e:
+                output_text = str(stdout)
+            try:
+                error_text = stderr.decode('utf-8', errors='replace')
+            except Exception as e:
+                error_text = str(stderr)
+
+            if process.returncode == 0:
+                # Try to parse output as JSON (for API results)
+                try:
+                    api_results = json.loads(output_text)
+                    return JsonResponse({
+                        'status': 'success',
+                        'message': 'PDF processing completed successfully',
+                        'api_results': api_results
+                    })
+                except Exception:
+                    # If not JSON, return raw output
+                    return JsonResponse({
+                        'status': 'success',
+                        'message': 'PDF processing completed successfully',
+                        'output': output_text
+                    })
+            else:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'Error processing PDF',
+                    'output': output_text,
+                    'error': error_text
+                })
+
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Error: {str(e)}'
             })
     
     return JsonResponse({
@@ -434,3 +556,30 @@ def get_pdf_files_list(request):
         'class_12_humanities': get_pdf_files(os.path.join(base_dir, 'class_12_humanities'))
     }
     return JsonResponse({'files': existing_pdfs})
+
+@csrf_exempt
+def delete_pdf(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+    class_name = request.POST.get('class_name')
+    file_name = request.POST.get('file_name')
+    if not class_name or not file_name:
+        return JsonResponse({'status': 'error', 'message': 'Missing parameters.'})
+    # Map class_name to folder
+    folder_map = {
+        'class_10': os.path.join('student_api', 'text_recognition', 'data', 'class_10'),
+        'class_12_science': os.path.join('student_api', 'text_recognition', 'data', 'class_12_science'),
+        'class_12_commerce': os.path.join('student_api', 'text_recognition', 'data', 'class_12_commerce'),
+        'class_12_humanities': os.path.join('student_api', 'text_recognition', 'data', 'class_12_humanities'),
+    }
+    folder = folder_map.get(class_name)
+    if not folder:
+        return JsonResponse({'status': 'error', 'message': 'Invalid class name.'})
+    file_path = os.path.join(folder, file_name)
+    if not os.path.isfile(file_path):
+        return JsonResponse({'status': 'error', 'message': 'File not found.'})
+    try:
+        os.remove(file_path)
+        return JsonResponse({'status': 'success', 'message': f'{file_name} deleted successfully.'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': f'Error deleting file: {str(e)}'})
