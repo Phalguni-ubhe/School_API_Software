@@ -26,13 +26,11 @@ class ResultAnalyzer10th:
             (0, 0.99, -3, 'Fail')
         ]
 
+        self.generated_files = []
+
     def extract_text_from_pdf(self, pdf_path):
-        try:
-            with pdfplumber.open(pdf_path) as pdf:
-                return "\n".join(page.extract_text() or "" for page in pdf.pages)
-        except Exception as e:
-            print(f"Failed to extract: {e}")
-            return ""
+        with pdfplumber.open(pdf_path) as pdf:
+            return "\n".join(page.extract_text() or "" for page in pdf.pages)
 
     def extract_student_blocks(self, text):
         lines = text.splitlines()
@@ -74,6 +72,8 @@ class ResultAnalyzer10th:
 
     def process_pdf(self, path):
         text = self.extract_text_from_pdf(path)
+        if not text.strip():
+            return pd.DataFrame()
         blocks = self.extract_student_blocks(text)
         all_students = []
 
@@ -84,10 +84,7 @@ class ResultAnalyzer10th:
             marks = self.extract_marks(block)
             if not marks:
                 continue
-            student = {
-                'Roll_Number': info['Roll_Number'],
-                'Name': info['Name']
-            }
+            student = {'Roll_Number': info['Roll_Number'], 'Name': info['Name']}
             for code in self.subject_codes:
                 student[code] = marks.get(code, None)
             all_students.append(student)
@@ -96,10 +93,7 @@ class ResultAnalyzer10th:
     def calculate_best_of_5(self, df):
         simplified = []
         for _, row in df.iterrows():
-            data = {
-                'Roll_Number': row['Roll_Number'],
-                'Name': row['Name']
-            }
+            data = {'Roll_Number': row['Roll_Number'], 'Name': row['Name']}
             for code in self.subject_codes:
                 data[code] = row[code] if not pd.isna(row[code]) else None
             scores = [row[code] for code in self.subject_codes if not pd.isna(row[code])]
@@ -137,10 +131,11 @@ class ResultAnalyzer10th:
         subject_api_dir = os.path.join(output_dir, 'subject_api')
         os.makedirs(subject_api_dir, exist_ok=True)
 
-        df_api = pd.DataFrame(grade_data)
-        df_api.to_csv(os.path.join(subject_api_dir, f'API_{self.subject_codes[subject_code]}.csv'), index=False)
+        file_path = os.path.join(subject_api_dir, f'API_{self.subject_codes[subject_code]}.csv')
+        pd.DataFrame(grade_data).to_csv(file_path, index=False)
+        self.generated_files.append(file_path)
 
-    def generate_api_summary(self, df):
+    def generate_api_summary(self, df, output_dir):
         rows = []
         for i, (code, name) in enumerate(self.subject_codes.items(), start=1):
             series = df[code].dropna()
@@ -168,39 +163,11 @@ class ResultAnalyzer10th:
             )
             row['API'] = round(points / total, 2) if total > 0 else '#DIV/0!'
             rows.append(row)
-        return pd.DataFrame(rows)
 
-    def generate_overall_api_report(self, df, output_dir):
-        all_marks = []
-        for code in self.subject_codes:
-            all_marks.extend(df[code].dropna().tolist())
-
-        marks_series = pd.Series(all_marks)
-        total_points = 0
-        total_students = len(marks_series)
-
-        overall_rows = []
-        for min_m, max_m, pts, label in self.grade_ranges:
-            if label == 'Fail':
-                count = sum(marks_series == 0)
-            else:
-                count = sum((marks_series >= min_m) & (marks_series <= max_m))
-            points = count * pts
-            total_points += points
-            overall_rows.append({
-                'Range': label,
-                'Points to be Awarded': pts,
-                'no of students': count,
-                'POINTS': points
-            })
-
-        overall_rows.append({'Range': 'Total', 'Points to be Awarded': '', 'no of students': '', 'POINTS': total_points})
-        overall_api = round(total_points / total_students, 2) if total_students > 0 else '#DIV/0!'
-        overall_rows.append({'Range': 'OVERALL API', 'Points to be Awarded': '', 'no of students': total_students, 'POINTS': overall_api})
-
-        df_overall = pd.DataFrame(overall_rows)
-        df_overall.to_csv(os.path.join(output_dir, 'overall_api.csv'), index=False)
-        print("\nSaved overall_api.csv")
+        df_summary = pd.DataFrame(rows)
+        summary_path = os.path.join(output_dir, 'subject_api', '10th_Subject_Wise_API_Summary.csv')
+        df_summary.to_csv(summary_path, index=False)
+        self.generated_files.append(summary_path)
 
     def generate_overall_summary_csv(self, df, output_dir):
         all_marks = []
@@ -209,44 +176,34 @@ class ResultAnalyzer10th:
 
         marks_series = pd.Series(all_marks)
         total_students = len(marks_series)
-        passed_students = sum(marks_series >= 33)
 
-        count_95 = sum(marks_series > 95)
-        count_90 = sum((marks_series > 90) & (marks_series <= 95))
-        count_80 = sum((marks_series > 80) & (marks_series <= 90))
-        count_70 = sum((marks_series > 70) & (marks_series <= 80))
-        count_60 = sum((marks_series > 60) & (marks_series <= 70))
-        count_50 = sum((marks_series > 50) & (marks_series <= 60))
-        count_33 = sum((marks_series > 33) & (marks_series <= 50))
-        compartment = sum((marks_series >= 1) & (marks_series <= 32))
-        fail = sum(marks_series == 0)
+        overall_row = {
+            'CLASS X OVERALL': '',
+            'No of students appeared': total_students,
+            'No of students passed': sum(marks_series >= 33),
+            '>95': sum(marks_series > 95),
+            '>90': sum((marks_series > 90) & (marks_series <= 95)),
+            '>80': sum((marks_series > 80) & (marks_series <= 90)),
+            '>70': sum((marks_series > 70) & (marks_series <= 80)),
+            '>60': sum((marks_series > 60) & (marks_series <= 70)),
+            '>50': sum((marks_series > 50) & (marks_series <= 60)),
+            '>33': sum((marks_series > 33) & (marks_series <= 50)),
+            'Compartment': sum((marks_series >= 1) & (marks_series <= 32)),
+            'Fail': sum(marks_series == 0)
+        }
 
-        total_points = (
-            count_95 * 10 + count_90 * 8 + count_80 * 6 + count_70 * 4 +
-            count_60 * 2 + count_50 * 0 + count_33 * -1 +
-            compartment * -2 + fail * -3
+        points = (
+            overall_row['>95'] * 10 + overall_row['>90'] * 8 + overall_row['>80'] * 6 +
+            overall_row['>70'] * 4 + overall_row['>60'] * 2 + overall_row['>50'] * 0 +
+            overall_row['>33'] * -1 + overall_row['Compartment'] * -2 + overall_row['Fail'] * -3
         )
 
-        api = round(total_points / total_students, 2) if total_students > 0 else '#DIV/0!'
+        overall_row['API'] = round(points / total_students, 2) if total_students > 0 else '#DIV/0!'
 
-        summary_data = [{
-            'No of students appeared': total_students,
-            'No of students passed': passed_students,
-            '>95': count_95,
-            '>90': count_90,
-            '>80': count_80,
-            '>70': count_70,
-            '>60': count_60,
-            '>50': count_50,
-            '>33': count_33,
-            'Compartment': compartment,
-            'Fail': fail,
-            'API': api
-        }]
-
-        df_summary = pd.DataFrame(summary_data)
-        df_summary.to_csv(os.path.join(output_dir, 'overall_summary.csv'), index=False)
-        print("\nSaved overall_summary.csv")
+        df_overall = pd.DataFrame([overall_row])
+        summary_path = os.path.join(output_dir, '10th_overall_summary.csv')
+        df_overall.to_csv(summary_path, index=False)
+        self.generated_files.append(summary_path)
 
     def process_all(self):
         base = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
@@ -262,32 +219,37 @@ class ResultAnalyzer10th:
                     if not df.empty:
                         all_dfs.append(df)
 
+        # Filter out empty/all-NA DataFrames (FutureWarning Fix)
+        all_dfs = [df for df in all_dfs if not df.empty and not df.isna().all().all()]
+
         if not all_dfs:
-            print("No results processed.")
-            return
+            return False  # No data processed
 
         merged = pd.concat(all_dfs, ignore_index=True)
-        simplified = self.calculate_best_of_5(merged)
-        simplified.to_csv(os.path.join(out_dir, '10th_result.csv'), index=False)
+        merged_best5 = self.calculate_best_of_5(merged)
 
-        print("\nSaved 10th_result.csv")
+        result_path = os.path.join(out_dir, '10th_result.csv')
+        merged_best5.to_csv(result_path, index=False)
+        self.generated_files.append(result_path)
 
         for code in self.subject_codes:
-            self.save_subject_api(simplified, code, out_dir)
+            self.save_subject_api(merged_best5, code, out_dir)
 
-        api_summary = self.generate_api_summary(simplified)
-        api_summary.to_csv(os.path.join(out_dir, 'subject_api', 'Subject_Wise_API_Summary.csv'), index=False)
-        print("\nSaved Subject_Wise_API_Summary.csv")
+        self.generate_api_summary(merged_best5, out_dir)
+        self.generate_overall_summary_csv(merged_best5, out_dir)
 
-        # Save overall API report
-        self.generate_overall_api_report(simplified, out_dir)
-
-        # Save overall summary CSV in requested format
-        self.generate_overall_summary_csv(simplified, out_dir)
+        return True  # Process Successful
 
 def main():
-    analyzer = ResultAnalyzer10th()
-    analyzer.process_all()
+    try:
+        analyzer = ResultAnalyzer10th()
+        success = analyzer.process_all()
+        if success:
+            print("Successful")
+        else:
+            print("No Data Found")
+    except Exception as e:
+        print(f"Error: {e}")
 
 if __name__ == "__main__":
     main()
