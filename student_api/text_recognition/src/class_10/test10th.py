@@ -202,6 +202,52 @@ class ResultAnalyzer10th:
         df_overall.to_csv(os.path.join(output_dir, 'overall_api.csv'), index=False)
         print("\nSaved overall_api.csv")
 
+    def generate_overall_summary_csv(self, df, output_dir):
+        all_marks = []
+        for code in self.subject_codes:
+            all_marks.extend(df[code].dropna().tolist())
+
+        marks_series = pd.Series(all_marks)
+        total_students = len(marks_series)
+        passed_students = sum(marks_series >= 33)
+
+        count_95 = sum(marks_series > 95)
+        count_90 = sum((marks_series > 90) & (marks_series <= 95))
+        count_80 = sum((marks_series > 80) & (marks_series <= 90))
+        count_70 = sum((marks_series > 70) & (marks_series <= 80))
+        count_60 = sum((marks_series > 60) & (marks_series <= 70))
+        count_50 = sum((marks_series > 50) & (marks_series <= 60))
+        count_33 = sum((marks_series > 33) & (marks_series <= 50))
+        compartment = sum((marks_series >= 1) & (marks_series <= 32))
+        fail = sum(marks_series == 0)
+
+        total_points = (
+            count_95 * 10 + count_90 * 8 + count_80 * 6 + count_70 * 4 +
+            count_60 * 2 + count_50 * 0 + count_33 * -1 +
+            compartment * -2 + fail * -3
+        )
+
+        api = round(total_points / total_students, 2) if total_students > 0 else '#DIV/0!'
+
+        summary_data = [{
+            'No of students appeared': total_students,
+            'No of students passed': passed_students,
+            '>95': count_95,
+            '>90': count_90,
+            '>80': count_80,
+            '>70': count_70,
+            '>60': count_60,
+            '>50': count_50,
+            '>33': count_33,
+            'Compartment': compartment,
+            'Fail': fail,
+            'API': api
+        }]
+
+        df_summary = pd.DataFrame(summary_data)
+        df_summary.to_csv(os.path.join(output_dir, 'overall_summary.csv'), index=False)
+        print("\nSaved overall_summary.csv")
+
     def process_all(self):
         base = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
         data_dir = os.path.join(base, 'data', 'class_10')
@@ -232,10 +278,12 @@ class ResultAnalyzer10th:
         api_summary = self.generate_api_summary(simplified)
         api_summary.to_csv(os.path.join(out_dir, 'subject_api', 'Subject_Wise_API_Summary.csv'), index=False)
         print("\nSaved Subject_Wise_API_Summary.csv")
-        print(api_summary.to_string(index=False))
 
-        # ✅ Save overall API report
+        # Save overall API report
         self.generate_overall_api_report(simplified, out_dir)
+
+        # Save overall summary CSV in requested format
+        self.generate_overall_summary_csv(simplified, out_dir)
 
 def main():
     analyzer = ResultAnalyzer10th()

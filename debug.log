@@ -252,3 +252,35 @@ INFO 2025-07-17 00:17:17,201 views Login attempt for username: yash
 WARNING 2025-07-17 00:17:17,554 views Failed login attempt for username: yash
 INFO 2025-07-17 00:17:24,883 views Login attempt for username: yash
 WARNING 2025-07-17 00:17:25,241 views Failed login attempt for username: yash
+INFO 2025-07-17 16:56:24,140 views Login attempt for username: yash
+WARNING 2025-07-17 16:56:24,507 views Failed login attempt for username: yash
+INFO 2025-07-17 16:56:30,188 views Login attempt for username: yash
+WARNING 2025-07-17 16:56:30,549 views Failed login attempt for username: yash
+INFO 2025-07-17 16:56:51,795 views Login attempt for username: admin
+WARNING 2025-07-17 16:56:52,393 views Failed login attempt for username: admin
+INFO 2025-07-17 16:56:58,990 views Login attempt for username: admin
+INFO 2025-07-17 16:57:00,010 views Generated OTP for user admin
+INFO 2025-07-17 16:57:00,010 views Attempting to send OTP email to phalguniubhe2005@gmail.com
+INFO 2025-07-17 16:57:02,137 views Login attempt for username: admin
+INFO 2025-07-17 16:57:02,586 views Generated OTP for user admin
+INFO 2025-07-17 16:57:02,586 views Attempting to send OTP email to phalguniubhe2005@gmail.com
+INFO 2025-07-17 16:57:04,163 views Successfully sent OTP email to phalguniubhe2005@gmail.com
+INFO 2025-07-17 16:57:05,973 views Successfully sent OTP email to phalguniubhe2005@gmail.com
+INFO 2025-07-30 21:30:15,079 views Login attempt for username: yash
+WARNING 2025-07-30 21:30:17,243 views Failed login attempt for username: yash
+INFO 2025-07-30 21:30:35,212 views Login attempt for username: yash
+INFO 2025-07-30 21:30:36,942 views Login attempt for username: yash
+WARNING 2025-07-30 21:30:39,906 views Failed login attempt for username: yash
+WARNING 2025-07-30 21:30:39,918 views Failed login attempt for username: yash
+INFO 2025-07-30 21:33:16,250 views Login attempt for username: yash
+INFO 2025-07-30 21:33:19,249 views Generated OTP for user yash
+INFO 2025-07-30 21:33:19,250 views Attempting to send OTP email to lightningmonster.1548@gmail.com
+INFO 2025-07-30 21:33:27,250 views Successfully sent OTP email to lightningmonster.1548@gmail.com
+INFO 2025-07-30 21:34:51,842 views Analyzer stdout: b'\r\nSaved 10th_result.csv\r\n\r\nSaved Subject_Wise_API_Summary.csv\r\n\r\nSaved overall_api.csv\r\n\r\nSaved overall_summary.csv\r\n'
+ERROR 2025-07-30 21:34:51,842 views Analyzer stderr: b''
+INFO 2025-07-30 21:35:31,628 views Analyzer stdout: b'\r\nSaved 10th_result.csv\r\n\r\nSaved Subject_Wise_API_Summary.csv\r\n\r\nSaved overall_api.csv\r\n\r\nSaved overall_summary.csv\r\n'
+ERROR 2025-07-30 21:35:31,629 views Analyzer stderr: b''
+INFO 2025-07-31 21:21:02,294 views Analyzer stdout: b'No results processed.\r\n'
+ERROR 2025-07-31 21:21:02,294 views Analyzer stderr: b''
+INFO 2025-07-31 21:21:34,239 views Analyzer stdout: b'No results processed.\r\n'
+ERROR 2025-07-31 21:21:34,240 views Analyzer stderr: b''
